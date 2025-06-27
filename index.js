@@ -11,15 +11,9 @@ if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
   process.exit(1);
 }
 
-// Dynamic redirect URI using environment variables
-const REPL_SLUG = process.env.REPL_SLUG || 'workspace';
-const REPL_OWNER = process.env.REPL_OWNER || 'sarahmodi0104';
-const REDIRECT_URI = `https://${REPL_SLUG}.${REPL_OWNER}.repl.co/oauth2callback`;
-
-
+const REDIRECT_URI = "https://cloud-phish-protector.onrender.com/oauth2callback";
 console.log(`Using redirect URI: ${REDIRECT_URI}`);
-console.log(`REPL_SLUG: ${process.env.REPL_SLUG || 'not set'}`);
-console.log(`REPL_OWNER: ${process.env.REPL_OWNER || 'not set'}`);
+
 
 // Set up OAuth2 client
 const oAuth2Client = new google.auth.OAuth2(
