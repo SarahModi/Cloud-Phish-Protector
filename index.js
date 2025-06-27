@@ -60,13 +60,25 @@ app.get('/oauth2callback', async (req, res) => {
     });
 
     const messages = response.data.messages || [];
-    let output = '<h2>Last 5 Gmail Message IDs</h2><ul>';
+    let output = '<h2>Last 5 Emails</h2><ul>';
 
-    for (let msg of messages) {
-      output += `<li>${msg.id}</li>`;
-    }
+for (let msg of messages) {
+  const msgData = await gmail.users.messages.get({
+    userId: 'me',
+    id: msg.id,
+    format: 'metadata',
+    metadataHeaders: ['Subject', 'From']
+  });
 
-    output += '</ul>';
+  const headers = msgData.data.payload.headers;
+  const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
+  const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
+
+  output += `<li><strong>From:</strong> ${from} <br/><strong>Subject:</strong> ${subject}</li><br/>`;
+}
+
+output += '</ul>';
+
     res.send(output);
   } catch (err) {
     console.error('Error during OAuth flow:', err);
