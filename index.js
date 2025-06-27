@@ -83,27 +83,33 @@ app.get('/oauth2callback', async (req, res) => {
     const messages = response.data.messages || [];
     let output = '<h2>Last 5 Emails</h2><ul>';
 
-    for (let msg of messages) {
-      const msgData = await gmail.users.messages.get({
-        userId: 'me',
-        id: msg.id,
-        format: 'metadata',
-        metadataHeaders: ['Subject', 'From']
-      });
+  for (let msg of messages) {
+  const msgData = await gmail.users.messages.get({
+    userId: 'me',
+    id: msg.id,
+    format: 'full',
+  });
 
-      const headers = msgData.data.payload.headers;
-      const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
-      const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
+  const headers = msgData.data.payload.headers;
+  const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
+  const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
 
-      const isSuspicious = isPhishing(subject, from);
+  let body = '';
 
-      output += `
-        <li>
-          <strong>From:</strong> ${from} <br/>
-          <strong>Subject:</strong> ${subject} <br/>
-          <strong>Phishing Risk:</strong> ${isSuspicious ? '⚠️ Yes' : '✅ No'}
-        </li><br/>
-      `;
+  const parts = msgData.data.payload.parts;
+  if (parts && parts.length) {
+    const textPart = parts.find(part => part.mimeType === 'text/plain');
+    if (textPart && textPart.body && textPart.body.data) {
+      body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
+    }
+  }
+
+  output += `<li>
+    <strong>From:</strong> ${from}<br/>
+    <strong>Subject:</strong> ${subject}<br/>
+    <strong>Body:</strong> <pre>${body.slice(0, 300)}...</pre>
+  </li><br/>`;
+  }
     }
 
     output += '</ul>';
