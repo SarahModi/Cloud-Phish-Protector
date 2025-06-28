@@ -1,3 +1,5 @@
+// Updated index.js - Phase 2 (Extract links from email body)
+
 const express = require('express');
 const { google } = require('googleapis');
 require('dotenv').config();
@@ -5,7 +7,6 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ Check for secrets
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
   console.error('\n❌ Missing CLIENT_ID or CLIENT_SECRET in Secrets!');
   process.exit(1);
@@ -14,31 +15,38 @@ if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET) {
 const REDIRECT_URI = "https://cloud-phish-protector.onrender.com/oauth2callback";
 console.log(`🔁 Using redirect URI: ${REDIRECT_URI}`);
 
-// ✅ Set up OAuth2 client
 const oAuth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
   REDIRECT_URI
 );
 
-// 🧠 Basic phishing keyword list
 const phishingKeywords = [
   'suspended', 'urgent', 'verify your account', 'click here',
   'free', 'reset your password', 'security alert', 'confirm',
   'login now', 'gift card', 'won', 'account locked'
 ];
 
-// 🧪 Simple phishing checker
-function isPhishing(subject, from) {
+function extractLinks(text) {
+  const linkRegex = /(https?:\/\/[^\s]+)/g;
+  return text.match(linkRegex) || [];
+}
+
+function isPhishing(subject, from, links) {
   subject = subject.toLowerCase();
   from = from.toLowerCase();
 
-  return phishingKeywords.some(keyword =>
+  const keywordHit = phishingKeywords.some(keyword =>
     subject.includes(keyword) || from.includes(keyword)
   );
+
+  const suspiciousLinks = links.length > 0;
+
+  if (keywordHit && suspiciousLinks) return 'Dangerous';
+  if (keywordHit || suspiciousLinks) return 'Suspicious';
+  return 'Safe';
 }
 
-// 🏠 Home page
 app.get('/', (req, res) => {
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -56,38 +64,28 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 🔐 OAuth2 callback
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
 
-  if (error) {
-    console.error(`❌ OAuth error: ${error}`);
-    return res.send(`❌ Access denied: ${error}`);
-  }
-
-  if (!code) {
-    return res.send('No auth code found. Something went wrong.');
-  }
+  if (error) return res.send(`Access denied: ${error}`);
+  if (!code) return res.send('No auth code found. Something went wrong.');
 
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
 
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-    const response = await gmail.users.messages.list({
-      userId: 'me',
-      maxResults: 5,
-    });
-
+    const response = await gmail.users.messages.list({ userId: 'me', maxResults: 5 });
     const messages = response.data.messages || [];
-    let output = '<h2>Last 5 Emails</h2><ul>';
+
+    let output = '<h2>Last 5 Emails (Phishing Status)</h2><ul>';
 
     for (let msg of messages) {
       const msgData = await gmail.users.messages.get({
         userId: 'me',
         id: msg.id,
-        format: 'full',
+        format: 'full'
       });
 
       const headers = msgData.data.payload.headers;
@@ -97,19 +95,20 @@ app.get('/oauth2callback', async (req, res) => {
       let body = '';
       const parts = msgData.data.payload.parts;
       if (parts && parts.length) {
-        const textPart = parts.find(part => part.mimeType === 'text/plain');
-        if (textPart && textPart.body && textPart.body.data) {
+        const textPart = parts.find(p => p.mimeType === 'text/plain');
+        if (textPart?.body?.data) {
           body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
         }
       }
 
-      const risk = isPhishing(subject, from) ? '⚠️ <span style="color:red;">Possible Phishing</span>' : '✅ Safe';
+      const links = extractLinks(body);
+      const verdict = isPhishing(subject, from, links);
 
       output += `<li>
         <strong>From:</strong> ${from}<br/>
         <strong>Subject:</strong> ${subject}<br/>
-        <strong>Risk:</strong> ${risk}<br/>
-        <strong>Body:</strong> <pre>${body.slice(0, 300)}...</pre>
+        <strong>Status:</strong> ${verdict}<br/>
+        <strong>Links:</strong> <pre>${links.join('\n') || 'None'}</pre>
       </li><br/>`;
     }
 
@@ -121,7 +120,6 @@ app.get('/oauth2callback', async (req, res) => {
   }
 });
 
-// 🚀 Start server
 app.listen(port, '0.0.0.0', () => {
   console.log(`✅ Server running on http://0.0.0.0:${port}`);
 });
