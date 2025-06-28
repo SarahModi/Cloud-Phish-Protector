@@ -5,6 +5,10 @@ require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+const path = require('path');
+
+// Tell Express to serve files like index.html, script.js, style.css from the "public" folder
+app.use(express.static(path.join(__dirname, 'public')));
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
   console.error('❌ Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY!');
@@ -185,6 +189,10 @@ app.get('/oauth2callback', async (req, res) => {
     console.error('❌ OAuth flow error:', err);
     res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
+  app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 });
 
 app.listen(port, '0.0.0.0', () => {
