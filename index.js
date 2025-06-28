@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
-  console.error('❌ Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY in Secrets!');
+  console.error('❌ Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY!');
   process.exit(1);
 }
 
@@ -33,16 +33,14 @@ function isPhishing(subject, from, body) {
 
 async function checkLinkSafety(link) {
   try {
-    const response = await axios.post(
-      `https://www.virustotal.com/api/v3/urls`,
-      `url=${link}`,
-      {
-        headers: {
-          'x-apikey': process.env.VIRUSTOTAL_API_KEY,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    );
+    const response = await axios.get(`https://www.virustotal.com/api/v3/urls`, {
+      headers: {
+        'x-apikey': process.env.VIRUSTOTAL_API_KEY,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: `url=${link}`,
+      method: 'POST'
+    });
 
     const urlId = response.data.data.id;
     const analysis = await axios.get(`https://www.virustotal.com/api/v3/analyses/${urlId}`, {
@@ -52,23 +50,38 @@ async function checkLinkSafety(link) {
     const stats = analysis.data.data.attributes.stats;
     return stats.malicious > 0 ? 'Dangerous' : stats.suspicious > 0 ? 'Suspicious' : 'Safe';
   } catch (error) {
-    console.error('🚫 VirusTotal error:', error.message);
+    console.error('⚠️ VirusTotal error:', error.message);
     return 'Unknown';
   }
 }
 
 app.get('/', (req, res) => {
   res.send(`
-    <h2>🌐 Phish Protector</h2>
-    <form action="/auth">
-      <label>Select Scan Mode:</label><br>
-      <select name="mode">
-        <option value="5">Quick Scan (Last 5 emails)</option>
-        <option value="50">Thorough Scan (Last 50 emails)</option>
-        <option value="all">Deep Scan (Entire inbox)</option>
-      </select><br><br>
-      <button type="submit">Login with Gmail</button>
-    </form>
+    <html>
+      <head>
+        <title>Phish Protector</title>
+        <style>
+          body { font-family: Arial; background: #f0f4f8; color: #222; padding: 30px; }
+          h2 { color: #0a76d8; }
+          form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 400px; }
+          select, button { padding: 8px; margin-top: 10px; width: 100%; }
+          footer { margin-top: 50px; font-size: 14px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <h2>🛡️ Phish Protector</h2>
+        <form action="/auth">
+          <label>Select Scan Mode:</label><br>
+          <select name="mode">
+            <option value="5">Quick Scan (Last 5 emails)</option>
+            <option value="50">Thorough Scan (Last 50 emails)</option>
+            <option value="all">Deep Scan (Entire inbox)</option>
+          </select><br>
+          <button type="submit">Login with Gmail</button>
+        </form>
+        <footer>Made with ❤️ by Sarah | Phish Protector v1.0</footer>
+      </body>
+    </html>
   `);
 });
 
@@ -92,7 +105,7 @@ app.get('/oauth2callback', async (req, res) => {
   const error = req.query.error;
   const mode = req.query.state;
 
-  if (error) return res.send(`Access denied: ${error}`);
+  if (error) return res.send(`❌ Access denied: ${error}`);
   if (!code) return res.send('No auth code found.');
 
   try {
@@ -110,7 +123,21 @@ app.get('/oauth2callback', async (req, res) => {
     });
 
     const messages = response.data.messages || [];
-    let output = `<h2>📧 Scanned ${messages.length} Emails</h2><ul>`;
+    let output = `
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial; padding: 30px; background: #fffbe6; color: #333; }
+            li { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-left: 5px solid #ccc; border-radius: 5px; }
+            .Safe { border-color: green; }
+            .Suspicious { border-color: orange; }
+            .Dangerous { border-color: red; }
+          </style>
+        </head>
+        <body>
+        <h2>🔍 Scan Result (${messages.length} emails)</h2>
+        <ul>
+    `;
 
     for (const msg of messages) {
       const msgData = await gmail.users.messages.get({
@@ -144,19 +171,19 @@ app.get('/oauth2callback', async (req, res) => {
         risk = risk === 'Safe' ? 'Suspicious' : risk;
       }
 
-      output += `<li>
+      output += `<li class="${risk}">
         <strong>From:</strong> ${from}<br/>
         <strong>Subject:</strong> ${subject}<br/>
         <strong>Risk:</strong> <span style="color: ${risk === 'Dangerous' ? 'red' : risk === 'Suspicious' ? 'orange' : 'green'}">${risk}</span><br/>
-        ${links.length ? `<strong>Links:</strong> ${links.join('<br/>')}` : ''}
-      </li><br/>`;
+        ${links.length ? `<strong>Links:</strong><br/> ${links.join('<br/>')}` : ''}
+      </li>`;
     }
 
-    output += '</ul>';
+    output += '</ul><br/><a href="/">🔙 Scan again</a></body></html>';
     res.send(output);
   } catch (err) {
-    console.error('❌ Error during OAuth flow:', err);
-    res.send('Something went wrong during login.');
+    console.error('❌ OAuth flow error:', err);
+    res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
 });
 
