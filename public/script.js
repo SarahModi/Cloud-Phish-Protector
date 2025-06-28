@@ -42,11 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fetchScanResults = async (mode) => {
         try {
-            const response = await fetch(`/scan?mode=${mode}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+           const response = await fetch(`/scan?mode=${mode}`);
+if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+}
+const data = await response.json();
+
             renderResults(data);
         } catch (error) {
             console.error("Failed to fetch scan results:", error);
