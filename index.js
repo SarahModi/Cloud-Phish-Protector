@@ -7,12 +7,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
-  console.error('Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY in Secrets!');
+  console.error('❌ Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY in Secrets!');
   process.exit(1);
 }
 
 const REDIRECT_URI = "https://cloud-phish-protector.onrender.com/oauth2callback";
-console.log(`Using redirect URI: ${REDIRECT_URI}`);
+console.log(`✅ Using redirect URI: ${REDIRECT_URI}`);
 
 const oAuth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
@@ -33,14 +33,16 @@ function isPhishing(subject, from, body) {
 
 async function checkLinkSafety(link) {
   try {
-    const response = await axios.get(`https://www.virustotal.com/api/v3/urls`, {
-      headers: {
-        'x-apikey': process.env.VIRUSTOTAL_API_KEY,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      data: `url=${link}`,
-      method: 'POST'
-    });
+    const response = await axios.post(
+      `https://www.virustotal.com/api/v3/urls`,
+      `url=${link}`,
+      {
+        headers: {
+          'x-apikey': process.env.VIRUSTOTAL_API_KEY,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
 
     const urlId = response.data.data.id;
     const analysis = await axios.get(`https://www.virustotal.com/api/v3/analyses/${urlId}`, {
@@ -50,14 +52,14 @@ async function checkLinkSafety(link) {
     const stats = analysis.data.data.attributes.stats;
     return stats.malicious > 0 ? 'Dangerous' : stats.suspicious > 0 ? 'Suspicious' : 'Safe';
   } catch (error) {
-    console.error('VirusTotal error:', error.message);
+    console.error('🚫 VirusTotal error:', error.message);
     return 'Unknown';
   }
 }
 
 app.get('/', (req, res) => {
   res.send(`
-    <h2>Phish Protector</h2>
+    <h2>🌐 Phish Protector</h2>
     <form action="/auth">
       <label>Select Scan Mode:</label><br>
       <select name="mode">
@@ -108,7 +110,7 @@ app.get('/oauth2callback', async (req, res) => {
     });
 
     const messages = response.data.messages || [];
-    let output = `<h2>Scanned ${messages.length} Emails</h2><ul>`;
+    let output = `<h2>📧 Scanned ${messages.length} Emails</h2><ul>`;
 
     for (const msg of messages) {
       const msgData = await gmail.users.messages.get({
@@ -153,11 +155,11 @@ app.get('/oauth2callback', async (req, res) => {
     output += '</ul>';
     res.send(output);
   } catch (err) {
-    console.error('Error during OAuth flow:', err);
+    console.error('❌ Error during OAuth flow:', err);
     res.send('Something went wrong during login.');
   }
 });
 
 app.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${port}`);
+  console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
