@@ -1,57 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cloud Phish Protector</title>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phish Protector</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <main id="landing-page" class="view">
-    <div class="content-wrapper">
-      <header class="landing-header">
-        <h1>Cloud Phish Protector</h1>
-        <p>Secure your inbox with intelligent, real-time phishing detection. Log in to start your scan.</p>
+<body class="dark">
+  <main id="landing-page">
+    <div class="container">
+      <header class="header">
+        <h1>Phish Protector</h1>
+        <p>Real-time email threat scanner, always protecting your inbox.</p>
       </header>
 
-      <div class="scan-options">
-        <label for="scan-mode">Select Scan Depth:</label>
-        <select id="scan-mode" name="scan-mode">
-          <option value="5">Scan last 5 emails</option>
-          <option value="50">Scan last 50 emails</option>
-          <option value="all">Scan entire inbox</option>
-        </select>
+      <div class="scan-controls">
+        <p class="info">🔒 Auto-scan is always active.</p>
+        <div class="scan-option">
+          <label for="email-query">📩 Scan Specific Email</label>
+          <input type="text" id="email-query" placeholder="Enter sender or subject...">
+          <button onclick="scanSpecific()">Scan Now</button>
+        </div>
+        <div class="scan-option">
+          <label>📂 Full Inbox/Junk/Archive</label>
+          <button onclick="scanFull()">Full Scan</button>
+        </div>
       </div>
 
-      <a id="login-button" href="#" class="cta-button">
-        <span>Login with Gmail & Scan</span>
+      <a class="cta-button" href="/auth">
+        <span>Login with Gmail</span>
       </a>
     </div>
   </main>
 
-  <main id="dashboard" class="view hidden">
-   <header class="dashboard-header">
-    <h2>Email Scan Report</h2>
-    <p>Here's what we found in your recent emails.</p>
-  </header>
-
-  <div id="loading-indicator" class="loading">
-    <div class="spinner">
-      <div class="bounce1"></div>
-      <div class="bounce2"></div>
-      <div class="bounce3"></div>
-    </div>
-    <p>Scanning your inbox...</p>
-  </div>
-
-  <div id="results-container">
-    <!-- Email cards will appear here via JavaScript -->
-  </div>
-  </main>
-
-  <script src="script.js"></script>
+  <script>
+    function scanSpecific() {
+      const query = document.getElementById("email-query").value;
+      if (!query) return alert("Please enter a sender or subject.");
+      window.location.href = `/auth?mode=specific&query=${encodeURIComponent(query)}`;
+    }
+    function scanFull() {
+      window.location.href = "/auth?mode=full";
+    }
+  </script>
 </body>
 </html>
