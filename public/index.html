@@ -1,48 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Phish Protector</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #2a2a2a;
+      color: #f8f8f8;
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #3a3a3a;
+      border-radius: 16px;
+      padding: 30px 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 100%;
+    }
+    h2 {
+      color: #fce4ec;
+      margin-bottom: 10px;
+    }
+    label {
+      margin-top: 20px;
+      display: block;
+      color: #c0c0c0;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    select {
+      background-color: #444;
+      color: #fff;
+    }
+    button {
+      background: #ec407a;
+      color: white;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #d81b60;
+    }
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
 </head>
-<body class="dark">
-  <main id="landing-page">
-    <div class="container">
-      <header class="header">
-        <h1>Phish Protector</h1>
-        <p>Real-time email threat scanner, always protecting your inbox.</p>
-      </header>
-
-      <div class="scan-controls">
-        <p class="info">🔒 Auto-scan is always active.</p>
-        <div class="scan-option">
-          <label for="email-query">📩 Scan Specific Email</label>
-          <input type="text" id="email-query" placeholder="Enter sender or subject...">
-          <button onclick="scanSpecific()">Scan Now</button>
-        </div>
-        <div class="scan-option">
-          <label>📂 Full Inbox/Junk/Archive</label>
-          <button onclick="scanFull()">Full Scan</button>
-        </div>
-      </div>
-
-      <a class="cta-button" href="/auth">
-        <span>Login with Gmail</span>
-      </a>
-    </div>
-  </main>
+<body>
+  <div class="card">
+    <h2>🛡️ Phish Protector</h2>
+    <form id="scanForm">
+      <label for="scan-mode">Choose Scan Mode:</label>
+      <select id="scan-mode" name="scan-mode">
+        <option value="specific">📧 Scan a specific email</option>
+        <option value="inbox">📂 Scan Inbox</option>
+        <option value="junk">🚮 Scan Junk Folder</option>
+        <option value="archive">🗃️ Scan Archive</option>
+      </select>
+      <button type="submit">Login with Gmail</button>
+    </form>
+    <footer>Made with 💖 by Ro'eh | Phish Protector</footer>
+  </div>
 
   <script>
-    function scanSpecific() {
-      const query = document.getElementById("email-query").value;
-      if (!query) return alert("Please enter a sender or subject.");
-      window.location.href = `/auth?mode=specific&query=${encodeURIComponent(query)}`;
-    }
-    function scanFull() {
-      window.location.href = "/auth?mode=full";
-    }
+    document.getElementById("scanForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const mode = document.getElementById("scan-mode").value;
+      if (mode === "specific") {
+        alert("📧 Soon you’ll be able to select a specific email from Outlook.");
+        // Here we can add redirect to Outlook picker later
+      } else {
+        window.location.href = `/auth?mode=${mode}`;
+      }
+    });
   </script>
 </body>
 </html>
