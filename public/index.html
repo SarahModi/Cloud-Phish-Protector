@@ -2,94 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Phish Protector</title>
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
+      background-color: #2c2a30;
+      color: #f7f7f7;
       font-family: 'Inter', sans-serif;
-      background-color: #2a2a2a;
-      color: #f8f8f8;
-      padding: 40px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
     .card {
-      background: #3a3a3a;
+      background: #3b3942;
       border-radius: 16px;
-      padding: 30px 40px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      max-width: 400px;
+      padding: 30px;
       width: 100%;
+      max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      text-align: center;
     }
-    h2 {
-      color: #fce4ec;
+    h1 {
+      font-size: 28px;
+      color: #ffbfd9;
       margin-bottom: 10px;
     }
-    label {
-      margin-top: 20px;
-      display: block;
-      color: #c0c0c0;
+    p {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 30px;
     }
     select, button {
       width: 100%;
       padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 8px;
+      margin: 12px 0;
       font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
     }
     select {
-      background-color: #444;
+      background: #504d56;
       color: #fff;
     }
     button {
-      background: #ec407a;
-      color: white;
-      margin-top: 20px;
+      background: #6ab3f8;
+      color: #1e1e1e;
+      font-weight: 600;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: background 0.3s ease;
     }
     button:hover {
-      background: #d81b60;
+      background: #90d0ff;
     }
-    footer {
+    .footer {
       margin-top: 30px;
-      text-align: center;
-      font-size: 14px;
-      color: #888;
+      font-size: 12px;
+      color: #999;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>🛡️ Phish Protector</h2>
-    <form id="scanForm">
-      <label for="scan-mode">Choose Scan Mode:</label>
-      <select id="scan-mode" name="scan-mode">
-        <option value="specific">📧 Scan a specific email</option>
-        <option value="inbox">📂 Scan Inbox</option>
-        <option value="junk">🚮 Scan Junk Folder</option>
-        <option value="archive">🗃️ Scan Archive</option>
-      </select>
-      <button type="submit">Login with Gmail</button>
-    </form>
-    <footer>Made with 💖 by Ro'eh | Phish Protector</footer>
+    <h1>Phish Protector</h1>
+    <p>Stay ahead of threats. Scan your emails instantly & securely.</p>
+
+    <select id="scan-mode">
+      <option value="inbox">📥 Scan Inbox</option>
+      <option value="junk">🗑️ Scan Junk</option>
+      <option value="archive">📦 Scan Archive</option>
+      <option value="specific">🔍 Scan Specific Email</option>
+    </select>
+
+    <button onclick="handleLogin()">🔐 Login with Gmail</button>
+
+    <div class="footer">
+      Built with ❤️ by Ro'eh · v1.0
+    </div>
   </div>
 
   <script>
-    document.getElementById("scanForm").addEventListener("submit", function (e) {
-      e.preventDefault();
-      const mode = document.getElementById("scan-mode").value;
-      if (mode === "specific") {
-        alert("📧 Soon you’ll be able to select a specific email from Outlook.");
-        // Here we can add redirect to Outlook picker later
+    function handleLogin() {
+      const mode = document.getElementById('scan-mode').value;
+
+      if (mode === 'specific') {
+        // simulate redirect to Outlook for now
+        alert("Redirecting to Outlook to choose email...");
+        // in final version: open file picker / Outlook integration
+        window.location.href = "/auth?mode=specific";
       } else {
         window.location.href = `/auth?mode=${mode}`;
       }
-    });
+    }
   </script>
 </body>
 </html>
