@@ -89,11 +89,15 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-    res.redirect(`/scan?state=${encodeURIComponent(state)}`);
+    res.redirect(`/dashboard?state=${encodeURIComponent(state)}`);
   } catch (err) {
     console.error('❌ OAuth flow error:', err);
     res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/scan', async (req, res) => {
@@ -157,20 +161,14 @@ app.get('/scan', async (req, res) => {
       results.push({ from, subject, riskLevel: risk, links });
     }
 
-    let html = `<html><body><h2>📬 Scan Result (${mode})</h2><ul>`;
-    for (const r of results) {
-      html += `<li><strong>From:</strong> ${r.from}<br/><strong>Subject:</strong> ${r.subject}<br/><strong>Risk:</strong> ${r.riskLevel}<br/>${r.links.length ? 'Links:<br/>' + r.links.join('<br/>') : ''}</li><hr/>`;
-    }
-    html += `</ul><br/><a href="/">🔙 Back to Dashboard</a></body></html>`;
-    res.send(html);
+    res.json({ results });
 
   } catch (err) {
     console.error('❌ Scan error:', err);
-    res.status(500).send(`<p style="color:red;">Scan failed.</p>`);
+    res.status(500).json({ error: 'Scan failed' });
   }
 });
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
-
