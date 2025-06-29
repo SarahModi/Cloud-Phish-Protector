@@ -7,7 +7,6 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Serve static files from "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
@@ -16,8 +15,6 @@ if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTO
 }
 
 const REDIRECT_URI = "https://cloud-phish-protector.onrender.com/oauth2callback";
-console.log(`✅ Using redirect URI: ${REDIRECT_URI}`);
-
 const oAuth2Client = new google.auth.OAuth2(
   process.env.CLIENT_ID,
   process.env.CLIENT_SECRET,
@@ -59,14 +56,15 @@ async function checkLinkSafety(link) {
   }
 }
 
-// Serve the landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Handle Gmail auth
 app.get('/auth', (req, res) => {
   const mode = req.query.mode || 'inbox';
+  const query = req.query.query || '';
+  const state = `${mode}:${query}`;
+
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -75,16 +73,15 @@ app.get('/auth', (req, res) => {
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/gmail.readonly'
     ],
-    state: mode
+    state
   });
   res.redirect(authUrl);
 });
 
-// OAuth2 callback
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
-  const mode = req.query.state;
+  const state = req.query.state || 'inbox:';
 
   if (error) return res.send(`❌ Access denied: ${error}`);
   if (!code) return res.send('No auth code found.');
@@ -92,30 +89,37 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-    res.redirect(`/scan?mode=${mode}`);
+    res.redirect(`/scan?state=${encodeURIComponent(state)}`);
   } catch (err) {
     console.error('❌ OAuth flow error:', err);
     res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
 });
 
-// Scan route
 app.get('/scan', async (req, res) => {
-  const mode = req.query.mode || 'inbox';
-  let labelIds = ['INBOX'];
+  const [mode, query] = (req.query.state || 'inbox:').split(':');
+  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
-  if (mode === 'spam') labelIds = ['SPAM'];
-  if (mode === 'archive') labelIds = ['CATEGORY_PERSONAL'];
+  let messages = [];
 
   try {
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-    const response = await gmail.users.messages.list({
-      userId: 'me',
-      maxResults: 20,
-      labelIds: labelIds
-    });
+    if (mode === 'specific') {
+      const result = await gmail.users.messages.list({
+        userId: 'me',
+        q: query,
+        maxResults: 1
+      });
+      messages = result.data.messages || [];
+    } else {
+      const labelId = mode === 'junk' ? 'SPAM' : 'INBOX';
+      const result = await gmail.users.messages.list({
+        userId: 'me',
+        labelIds: [labelId],
+        maxResults: 10
+      });
+      messages = result.data.messages || [];
+    }
 
-    const messages = response.data.messages || [];
     const results = [];
 
     for (const msg of messages) {
@@ -153,41 +157,20 @@ app.get('/scan', async (req, res) => {
       results.push({ from, subject, riskLevel: risk, links });
     }
 
-    res.send(`
-      <html>
-        <head>
-          <title>Scan Results</title>
-          <style>
-            body { font-family: Inter, sans-serif; background: #1a1a1a; color: #fff; padding: 30px; }
-            li { background: #333; padding: 15px; margin: 10px 0; border-left: 5px solid #777; border-radius: 5px; }
-            .Safe { border-color: #4caf50; }
-            .Suspicious { border-color: #ff9800; }
-            .Dangerous { border-color: #f44336; }
-          </style>
-        </head>
-        <body>
-          <h2>📊 Scan Results (${results.length})</h2>
-          <ul>
-            ${results.map(r => `
-              <li class="${r.riskLevel}">
-                <strong>From:</strong> ${r.from}<br>
-                <strong>Subject:</strong> ${r.subject}<br>
-                <strong>Risk:</strong> ${r.riskLevel}<br>
-                ${r.links.length ? `<strong>Links:</strong><br>${r.links.join('<br>')}` : ''}
-              </li>
-            `).join('')}
-          </ul>
-          <a href="/">🔙 Back</a>
-        </body>
-      </html>
-    `);
+    let html = `<html><body><h2>📬 Scan Result (${mode})</h2><ul>`;
+    for (const r of results) {
+      html += `<li><strong>From:</strong> ${r.from}<br/><strong>Subject:</strong> ${r.subject}<br/><strong>Risk:</strong> ${r.riskLevel}<br/>${r.links.length ? 'Links:<br/>' + r.links.join('<br/>') : ''}</li><hr/>`;
+    }
+    html += `</ul><br/><a href="/">🔙 Back to Dashboard</a></body></html>`;
+    res.send(html);
 
   } catch (err) {
     console.error('❌ Scan error:', err);
-    res.status(500).send(`<p style="color:red;">Scan failed. Please try again later.</p>`);
+    res.status(500).send(`<p style="color:red;">Scan failed.</p>`);
   }
 });
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
+
