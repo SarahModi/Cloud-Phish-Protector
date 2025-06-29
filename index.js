@@ -59,15 +59,14 @@ async function checkLinkSafety(link) {
   }
 }
 
-let cachedTokens = null;
-
+// Serve the landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Handle Gmail auth
 app.get('/auth', (req, res) => {
   const mode = req.query.mode || 'inbox';
-  const emailId = req.query.emailId || '';
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -76,16 +75,16 @@ app.get('/auth', (req, res) => {
       'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/gmail.readonly'
     ],
-    state: JSON.stringify({ mode, emailId })
+    state: mode
   });
   res.redirect(authUrl);
 });
 
+// OAuth2 callback
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
-  const state = JSON.parse(req.query.state || '{}');
-  const { mode, emailId } = state;
+  const mode = req.query.state;
 
   if (error) return res.send(`❌ Access denied: ${error}`);
   if (!code) return res.send('No auth code found.');
@@ -93,100 +92,99 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-    cachedTokens = tokens;
-
-    if (mode === 'specific' && emailId) {
-      return res.redirect(`/scan-specific?emailId=${emailId}`);
-    }
-
-    return res.redirect(`/scan?mode=${mode}`);
+    res.redirect(`/scan?mode=${mode}`);
   } catch (err) {
     console.error('❌ OAuth flow error:', err);
     res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
 });
 
-app.get('/recent-emails', async (req, res) => {
+// Scan route
+app.get('/scan', async (req, res) => {
+  const mode = req.query.mode || 'inbox';
+  let labelIds = ['INBOX'];
+
+  if (mode === 'spam') labelIds = ['SPAM'];
+  if (mode === 'archive') labelIds = ['CATEGORY_PERSONAL'];
+
   try {
-    oAuth2Client.setCredentials(cachedTokens);
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-    const response = await gmail.users.messages.list({ userId: 'me', maxResults: 10 });
+    const response = await gmail.users.messages.list({
+      userId: 'me',
+      maxResults: 20,
+      labelIds: labelIds
+    });
+
     const messages = response.data.messages || [];
-    const previewList = [];
+    const results = [];
 
     for (const msg of messages) {
       const msgData = await gmail.users.messages.get({
         userId: 'me',
         id: msg.id,
-        format: 'metadata',
-        metadataHeaders: ['Subject', 'From']
+        format: 'full',
       });
 
       const headers = msgData.data.payload.headers;
       const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
       const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
-      previewList.push({ id: msg.id, subject, from });
-    }
 
-    res.json(previewList);
-  } catch (err) {
-    console.error('❌ Fetch recent emails error:', err);
-    res.status(500).json({ error: 'Could not load emails' });
-  }
-});
-
-app.get('/scan-specific', async (req, res) => {
-  const emailId = req.query.emailId;
-
-  try {
-    oAuth2Client.setCredentials(cachedTokens);
-    const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-    const msgData = await gmail.users.messages.get({
-      userId: 'me',
-      id: emailId,
-      format: 'full',
-    });
-
-    const headers = msgData.data.payload.headers;
-    const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
-    const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
-
-    let body = '', links = [], risk = 'Safe';
-    const parts = msgData.data.payload.parts || [];
-    const textPart = parts.find(p => p.mimeType === 'text/plain');
-
-    if (textPart?.body?.data) {
-      body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
-      const linkRegex = /https?:\/\/[\w.-]+(?:\/[\w._~:/?#\[\]@!$&'()*+,;=-]*)?/gi;
-      links = body.match(linkRegex) || [];
-
-      for (const link of links) {
-        const verdict = await checkLinkSafety(link);
-        if (verdict === 'Dangerous') {
-          risk = 'Dangerous'; break;
-        } else if (verdict === 'Suspicious' && risk !== 'Dangerous') {
-          risk = 'Suspicious';
+      let body = '', links = [], risk = 'Safe';
+      const parts = msgData.data.payload.parts || [];
+      const textPart = parts.find(p => p.mimeType === 'text/plain');
+      if (textPart?.body?.data) {
+        body = Buffer.from(textPart.body.data, 'base64').toString('utf8');
+        const linkRegex = /https?:\/\/[\w.-]+(?:\/[\w._~:/?#\[\]@!$&'()*+,;=-]*)?/gi;
+        links = body.match(linkRegex) || [];
+        for (const link of links) {
+          const verdict = await checkLinkSafety(link);
+          if (verdict === 'Dangerous') {
+            risk = 'Dangerous'; break;
+          } else if (verdict === 'Suspicious' && risk !== 'Dangerous') {
+            risk = 'Suspicious';
+          }
         }
       }
-    }
 
-    if (isPhishing(subject, from, body)) {
-      risk = risk === 'Safe' ? 'Suspicious' : risk;
+      if (isPhishing(subject, from, body)) {
+        risk = risk === 'Safe' ? 'Suspicious' : risk;
+      }
+
+      results.push({ from, subject, riskLevel: risk, links });
     }
 
     res.send(`
-      <html><body style="font-family: sans-serif; padding: 30px;">
-        <h2>Scan Result:</h2>
-        <p><strong>From:</strong> ${from}</p>
-        <p><strong>Subject:</strong> ${subject}</p>
-        <p><strong>Risk Level:</strong> ${risk}</p>
-        ${links.length ? `<p><strong>Links:</strong><br>${links.join('<br>')}</p>` : ''}
-        <a href="/">🔙 Back</a>
-      </body></html>
+      <html>
+        <head>
+          <title>Scan Results</title>
+          <style>
+            body { font-family: Inter, sans-serif; background: #1a1a1a; color: #fff; padding: 30px; }
+            li { background: #333; padding: 15px; margin: 10px 0; border-left: 5px solid #777; border-radius: 5px; }
+            .Safe { border-color: #4caf50; }
+            .Suspicious { border-color: #ff9800; }
+            .Dangerous { border-color: #f44336; }
+          </style>
+        </head>
+        <body>
+          <h2>📊 Scan Results (${results.length})</h2>
+          <ul>
+            ${results.map(r => `
+              <li class="${r.riskLevel}">
+                <strong>From:</strong> ${r.from}<br>
+                <strong>Subject:</strong> ${r.subject}<br>
+                <strong>Risk:</strong> ${r.riskLevel}<br>
+                ${r.links.length ? `<strong>Links:</strong><br>${r.links.join('<br>')}` : ''}
+              </li>
+            `).join('')}
+          </ul>
+          <a href="/">🔙 Back</a>
+        </body>
+      </html>
     `);
+
   } catch (err) {
-    console.error('❌ Scan specific email error:', err);
-    res.status(500).send('Failed to scan specific email');
+    console.error('❌ Scan error:', err);
+    res.status(500).send(`<p style="color:red;">Scan failed. Please try again later.</p>`);
   }
 });
 
