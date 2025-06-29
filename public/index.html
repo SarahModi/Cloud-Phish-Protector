@@ -71,7 +71,7 @@
     <h1>Phish Protector</h1>
     <p>Stay ahead of threats. Scan your emails instantly & securely.</p>
 
-    <select id="scan-mode">
+       <select id="scan-mode" onchange="showDialogIfNeeded(this.value)">
       <option value="inbox">📥 Scan Inbox</option>
       <option value="junk">🗑️ Scan Junk</option>
       <option value="archive">📦 Scan Archive</option>
@@ -86,18 +86,52 @@
   </div>
 
   <script>
-    function handleLogin() {
-      const mode = document.getElementById('scan-mode').value;
-
-      if (mode === 'specific') {
-        // simulate redirect to Outlook for now
-        alert("Redirecting to Outlook to choose email...");
-        // in final version: open file picker / Outlook integration
-        window.location.href = "/auth?mode=specific";
-      } else {
-        window.location.href = `/auth?mode=${mode}`;
-      }
+  function showDialogIfNeeded(mode) {
+    if (mode === 'specific') {
+      fetch('/recent-emails')
+        .then(res => res.json())
+        .then(data => {
+          const emailSelect = document.getElementById('emailSelect');
+          emailSelect.innerHTML = '';
+          data.forEach(email => {
+            const option = document.createElement('option');
+            option.value = email.id;
+            option.textContent = `${email.subject} — ${email.from}`;
+            emailSelect.appendChild(option);
+          });
+          document.getElementById('emailDialog').style.display = 'block';
+        });
     }
+  }
+
+  function cancelDialog() {
+    document.getElementById('emailDialog').style.display = 'none';
+    document.getElementById('scan-mode').value = 'inbox'; // reset
+  }
+
+  function confirmEmailSelection() {
+    const emailId = document.getElementById('emailSelect').value;
+    window.location.href = `/auth?mode=specific&emailId=${emailId}`;
+  }
+
+  function handleLogin() {
+    const mode = document.getElementById('scan-mode').value;
+    if (mode !== 'specific') {
+      window.location.href = `/auth?mode=${mode}`;
+    }
+  }
+
   </script>
+    <div id="emailDialog" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: #3b3942; color: white; padding: 20px; border-radius: 12px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 999;">
+    <h3 style="margin-bottom: 10px;">Choose an email to scan:</h3>
+    <select id="emailSelect" style="width: 100%; padding: 8px; background: #504d56; color: #fff; border: none; border-radius: 6px;">
+      <option>Loading...</option>
+    </select>
+    <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+      <button onclick="cancelDialog()" style="background: gray;">Cancel</button>
+      <button onclick="confirmEmailSelection()">Scan</button>
+    </div>
+  </div>
+
 </body>
 </html>
