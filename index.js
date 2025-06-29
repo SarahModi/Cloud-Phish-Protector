@@ -10,6 +10,7 @@ const port = process.env.PORT || 5000;
 // Serve static files from "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Check env vars
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
   console.error('❌ Missing CLIENT_ID, CLIENT_SECRET, or VIRUSTOTAL_API_KEY!');
   process.exit(1);
@@ -24,6 +25,7 @@ const oAuth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
+// Keywords for phishing detection
 const phishingKeywords = [
   'suspended', 'urgent', 'verify your account', 'click here',
   'free', 'reset your password', 'security alert', 'confirm',
@@ -59,14 +61,14 @@ async function checkLinkSafety(link) {
   }
 }
 
-// ✅ Serve the frontend HTML (login or dashboard)
+// ✅ Serve landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ✅ Handle login and store mode
+// ✅ Google OAuth login
 app.get('/auth', (req, res) => {
-  const mode = req.query.mode || '5';
+  const mode = req.query.mode || 'inbox'; // default to inbox scan
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: [
@@ -80,7 +82,7 @@ app.get('/auth', (req, res) => {
   res.redirect(authUrl);
 });
 
-// ✅ OAuth2 Callback - redirect to frontend dashboard with mode
+// ✅ After login, redirect to landing page
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
@@ -92,17 +94,21 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-    res.redirect(`/?loggedin=true&mode=${mode}`);
+    res.redirect(`/index.html?loggedin=true&mode=${mode}`);
   } catch (err) {
-    console.error('❌ OAuth flow error:', err);
-    res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
+    console.error('❌ OAuth error:', err);
+    res.send(`<p style="color:red;">Something went wrong during login. Try again.</p>`);
   }
 });
 
-// ✅ Your frontend will fetch this endpoint with fetch('/scan?mode=5')
+// ✅ Scanning route (fetches emails based on mode)
 app.get('/scan', async (req, res) => {
-  const mode = req.query.mode || '5';
-  const maxResults = mode === '50' ? 50 : mode === 'all' ? 500 : 5;
+  const mode = req.query.mode || 'inbox';
+
+  let maxResults = 5;
+  if (mode === 'inbox') maxResults = 50;
+  else if (mode === 'junk') maxResults = 30;
+  else if (mode === 'archive') maxResults = 100;
 
   try {
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
@@ -146,9 +152,7 @@ app.get('/scan', async (req, res) => {
         risk = risk === 'Safe' ? 'Suspicious' : risk;
       }
 
-      results.push({
-        from, subject, riskLevel: risk, links
-      });
+      results.push({ from, subject, riskLevel: risk, links });
     }
 
     res.json(results);
