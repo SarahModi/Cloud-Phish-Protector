@@ -2,12 +2,12 @@ const express = require('express');
 const { google } = require('googleapis');
 const axios = require('axios');
 require('dotenv').config();
+const path = require('path');
 
 const app = express();
 const port = process.env.PORT || 5000;
-const path = require('path');
 
-// Tell Express to serve files like index.html, script.js, style.css from the "public" folder
+// Serve static files from "public"
 app.use(express.static(path.join(__dirname, 'public')));
 
 if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.VIRUSTOTAL_API_KEY) {
@@ -59,36 +59,12 @@ async function checkLinkSafety(link) {
   }
 }
 
+// ✅ Serve the frontend HTML (login or dashboard)
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Phish Protector</title>
-        <style>
-          body { font-family: Arial; background: #f0f4f8; color: #222; padding: 30px; }
-          h2 { color: #0a76d8; }
-          form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; max-width: 400px; }
-          select, button { padding: 8px; margin-top: 10px; width: 100%; }
-          footer { margin-top: 50px; font-size: 14px; color: #666; }
-        </style>
-      </head>
-      <body>
-        <h2>🛡️ Phish Protector</h2>
-        <form action="/auth">
-          <label>Select Scan Mode:</label><br>
-          <select name="mode">
-            <option value="5">Quick Scan (Last 5 emails)</option>
-            <option value="50">Thorough Scan (Last 50 emails)</option>
-            <option value="all">Deep Scan (Entire inbox)</option>
-          </select><br>
-          <button type="submit">Login with Gmail</button>
-        </form>
-        <footer>Made with ❤️ by Sarah | Phish Protector v1.0</footer>
-      </body>
-    </html>
-  `);
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ✅ Handle login and store mode
 app.get('/auth', (req, res) => {
   const mode = req.query.mode || '5';
   const authUrl = oAuth2Client.generateAuthUrl({
@@ -104,6 +80,7 @@ app.get('/auth', (req, res) => {
   res.redirect(authUrl);
 });
 
+// ✅ OAuth2 Callback - redirect to frontend dashboard with mode
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
@@ -115,33 +92,27 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
+    res.redirect(`/?loggedin=true&mode=${mode}`);
+  } catch (err) {
+    console.error('❌ OAuth flow error:', err);
+    res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
+  }
+});
 
+// ✅ Your frontend will fetch this endpoint with fetch('/scan?mode=5')
+app.get('/scan', async (req, res) => {
+  const mode = req.query.mode || '5';
+  const maxResults = mode === '50' ? 50 : mode === 'all' ? 500 : 5;
+
+  try {
     const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-    let maxResults = 5;
-    if (mode === '50') maxResults = 50;
-    if (mode === 'all') maxResults = 500;
-
     const response = await gmail.users.messages.list({
       userId: 'me',
-      maxResults: maxResults,
+      maxResults
     });
 
     const messages = response.data.messages || [];
-    let output = `
-      <html>
-        <head>
-          <style>
-            body { font-family: Arial; padding: 30px; background: #fffbe6; color: #333; }
-            li { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-left: 5px solid #ccc; border-radius: 5px; }
-            .Safe { border-color: green; }
-            .Suspicious { border-color: orange; }
-            .Dangerous { border-color: red; }
-          </style>
-        </head>
-        <body>
-        <h2>🔍 Scan Result (${messages.length} emails)</h2>
-        <ul>
-    `;
+    const results = [];
 
     for (const msg of messages) {
       const msgData = await gmail.users.messages.get({
@@ -175,24 +146,16 @@ app.get('/oauth2callback', async (req, res) => {
         risk = risk === 'Safe' ? 'Suspicious' : risk;
       }
 
-      output += `<li class="${risk}">
-        <strong>From:</strong> ${from}<br/>
-        <strong>Subject:</strong> ${subject}<br/>
-        <strong>Risk:</strong> <span style="color: ${risk === 'Dangerous' ? 'red' : risk === 'Suspicious' ? 'orange' : 'green'}">${risk}</span><br/>
-        ${links.length ? `<strong>Links:</strong><br/> ${links.join('<br/>')}` : ''}
-      </li>`;
+      results.push({
+        from, subject, riskLevel: risk, links
+      });
     }
 
-    output += '</ul><br/><a href="/">🔙 Scan again</a></body></html>';
-    res.send(output);
+    res.json(results);
   } catch (err) {
-    console.error('❌ OAuth flow error:', err);
-    res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
+    console.error('❌ Scan error:', err);
+    res.status(500).json({ error: 'Scan failed' });
   }
-  app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 });
 
 app.listen(port, '0.0.0.0', () => {
