@@ -33,21 +33,23 @@
   </main>
 
   <main id="dashboard" class="view hidden">
-    <header class="dashboard-header">
-      <h2>Scan Report</h2>
-      <p>Analysis of your recent emails for potential threats.</p>
-    </header>
+   <header class="dashboard-header">
+    <h2>Email Scan Report</h2>
+    <p>Here's what we found in your recent emails.</p>
+  </header>
 
-    <div id="loading-indicator" class="hidden">
-      <div class="spinner">
-        <div class="bounce1"></div>
-        <div class="bounce2"></div>
-        <div class="bounce3"></div>
-      </div>
-      <p>Scanning your inbox... this may take a moment.</p>
+  <div id="loading-indicator" class="loading">
+    <div class="spinner">
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
     </div>
+    <p>Scanning your inbox...</p>
+  </div>
 
-    <div id="results-container"></div>
+  <div id="results-container">
+    <!-- Email cards will appear here via JavaScript -->
+  </div>
   </main>
 
   <script src="script.js"></script>
