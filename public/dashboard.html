@@ -53,13 +53,23 @@
     }
 
     /* === Cute Radar Loader from Uiverse.io by adamgiebl === */
-    #loadingScreen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
+ #loadingScreen {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  gap: 20px;
+  color: #ffcde6;
+}
+
+#loadingScreen.active {
+  display: flex;
+  opacity: 1;
+}
 
     .loader {
       position: relative;
@@ -133,7 +143,7 @@
     <h1>📬 Scan Results</h1>
 
     <!-- 🔄 Loader While Scanning -->
-   <div id="loading-screen">
+  <div id="loadingScreen">
   <div class="loader"><span></span></div>
   <p> Scanning emails...</p>
 </div>
@@ -148,15 +158,18 @@
     const loadingScreen = document.getElementById('loadingScreen');
     const resultsContainer = document.getElementById('results');
 
-    function showLoader() {
-      loadingScreen.style.display = 'flex';
-      resultsContainer.style.display = 'none';
-    }
+   function showLoader() {
+  loadingScreen.classList.add('active');
+  resultsContainer.style.display = 'none';
+}
 
-    function hideLoader() {
-      loadingScreen.style.display = 'none';
-      resultsContainer.style.display = 'grid';
-    }
+function hideLoader() {
+  loadingScreen.classList.remove('active');
+  setTimeout(() => {
+    loadingScreen.style.display = 'none';
+    resultsContainer.style.display = 'grid';
+  }, 500); // wait for fade-out transition to finish
+}
 
     async function fetchResults() {
       showLoader();
