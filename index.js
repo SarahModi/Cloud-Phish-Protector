@@ -56,10 +56,12 @@ async function checkLinkSafety(link) {
   }
 }
 
+// Serve landing page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Start OAuth flow
 app.get('/auth', (req, res) => {
   const mode = req.query.mode || 'inbox';
   const query = req.query.query || '';
@@ -78,6 +80,7 @@ app.get('/auth', (req, res) => {
   res.redirect(authUrl);
 });
 
+// Handle OAuth callback
 app.get('/oauth2callback', async (req, res) => {
   const code = req.query.code;
   const error = req.query.error;
@@ -96,6 +99,7 @@ app.get('/oauth2callback', async (req, res) => {
   }
 });
 
+// Scan emails
 app.get('/scan', async (req, res) => {
   const [mode, query] = (req.query.state || 'inbox:').split(':');
   const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
@@ -162,7 +166,6 @@ app.get('/scan', async (req, res) => {
       });
     }
 
-    // 🔁 CHANGED: respond with array, not object
     res.json(results);
   } catch (err) {
     console.error('❌ Scan error:', err);
@@ -170,6 +173,21 @@ app.get('/scan', async (req, res) => {
   }
 });
 
+// 🔐 Login Button Route (for /login button)
+app.get("/login", (req, res) => {
+  const url = oAuth2Client.generateAuthUrl({
+    access_type: "offline",
+    scope: [
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "openid"
+    ],
+  });
+  res.redirect(url);
+});
+
+// 🚀 Start Server
 app.listen(port, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://0.0.0.0:${port}`);
 });
