@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cyber Threat Protector Dashboard</title>
-  <link rel="stylesheet" href="index.css">
-  <script type="importmap">
-    {
-      "imports": {
-        "@google/genai": "https://esm.sh/@google/genai@^0.7.0"
-      }
-    }
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elegant Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app-container">
-    <aside id="sidebar"></aside>
-    <main id="main-content"></main>
+  <div class="dashboard">
+    <aside class="sidebar">
+      <h2 class="logo">UI</h2>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active"><span>🏠</span> Dashboard</a>
+        <a href="#" class="nav-item"><span>👤</span> Profile</a>
+        <a href="#" class="nav-item"><span>📚</span> Learn</a>
+        <a href="#" class="nav-item"><span>⚙️</span> Settings</a>
+      </nav>
+    </aside>
+    
+    <main class="main-content">
+      <h1>Welcome Back!</h1>
+      <p>This is your elegant, neumorphic dashboard UI.</p>
+    </main>
   </div>
-  <script type="module" src="index.tsx"></script>
 </body>
 </html>
