@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const isLoggedIn = urlParams.get('loggedin') === 'true';
         const scanMode = urlParams.get('mode');
 
-        if (isLoggedIn && scanMode) {
-            showDashboard();
+        if (UserisLoggedIn && scanMode) {
+           window.location.href = "/dashboard.html"; // or wherever your dashboard is
             fetchScanResults(scanMode);
         } else {
             showLandingPage();
