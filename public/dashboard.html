@@ -2,64 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Threat Protector Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Neumorphic Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app-container">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <span class="logo-icon">🛡️</span>
-        <span>Threat Protector</span>
+  <div id="app">
+    <div class="sidebar">
+      <h2>Threat Protector</h2>
+      <div class="nav">
+        <div class="nav-item active">Dashboard</div>
+        <div class="nav-item">Profile</div>
+        <div class="nav-item">Learn</div>
+        <div class="nav-item">Settings</div>
       </div>
-      <ul class="nav-list">
-        <li class="nav-item active">📊 Dashboard</li>
-        <li class="nav-item">👤 Profile</li>
-        <li class="nav-item">📚 Learn</li>
-        <li class="nav-item">⚙️ Settings</li>
-      </ul>
-    </aside>
+    </div>
 
-    <!-- Main Content -->
-    <main class="main-content">
-      <div class="cards">
-        <!-- Card 1 -->
-        <div class="card">
-          <h3>Scanned Emails</h3>
-          <p>You've scanned 120 emails in the last 7 days.</p>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="card">
-          <h3>Threats Detected</h3>
-          <p>5 phishing threats were detected.</p>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="card">
-          <h3>Safe Emails</h3>
-          <p>115 emails were marked as safe.</p>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="card">
-          <h3>Most Common Sender</h3>
-          <p>noreply@alerts.com</p>
-        </div>
-
-        <!-- Card 5 (Alone) -->
-        <div class="card full-width">
-          <h3>Threat: "Reset your password urgently"</h3>
-          <p>From: alert@phishy-fake.com</p>
-          <div class="action-buttons">
-            <button class="neumorphic-btn">🗑️ Delete Email</button>
-            <button class="neumorphic-btn">🚫 Block Sender</button>
-          </div>
-        </div>
-      </div>
-    </main>
+    <div class="main">
+      <h1>Welcome Back</h1>
+      <button class="neu-button">Scan Now</button>
+      <button class="neu-button">View Report</button>
+    </div>
   </div>
 </body>
 </html>
