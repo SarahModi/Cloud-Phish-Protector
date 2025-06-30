@@ -8,6 +8,8 @@
 </head>
 <body>
   <div id="app">
+    
+    <!-- Sidebar -->
     <div class="sidebar">
       <h2>Threat Protector</h2>
       <div class="nav">
@@ -17,12 +19,66 @@
         <div class="nav-item">Settings</div>
       </div>
     </div>
+    
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-grid">
+      <!-- Card 1: Recent Scans -->
+      <div class="dashboard-card">
+        <h2>Recent Email Scans</h2>
+        <ul>
+          <li><strong>From:</strong> hr@company.com — ✅ Safe</li>
+          <li><strong>From:</strong> unknown@phish.com — ⚠️ Threat</li>
+          <li><strong>From:</strong> support@bank.com — ✅ Safe</li>
+        </ul>
+      </div>
 
-    <div class="main">
-      <h1>Welcome Back</h1>
-      <button class="neu-button">Scan Now</button>
-      <button class="neu-button">View Report</button>
+      <!-- Card 2: Threat Stats -->
+      <div class="dashboard-card">
+        <h2>Threat Summary</h2>
+        <p>Total Scanned: <strong>1,254</strong></p>
+        <p>Threats Blocked: <strong>87</strong></p>
+        <p>Risk Level: <strong style="color: orange;">Medium</strong></p>
+        <p>Last Scan: <strong>Today, 2:45 PM</strong></p>
+      </div>
+
+      <!-- Card 3: Threat Logs -->
+      <div class="dashboard-card">
+        <h2>Threat Log</h2>
+        <ul>
+          <li>Invoice Scam — Blocked</li>
+          <li>Fake Dropbox — Alerted</li>
+          <li>Password Reset Phish — Deleted</li>
+        </ul>
+        <button class="soft-btn">View Full Log</button>
+      </div>
+
+      <!-- Card 4: Alerts -->
+      <div class="dashboard-card">
+        <h2>Alerts</h2>
+        <p>⚠️ 2 new phishing attempts blocked today</p>
+        <p>🔐 Suspicious login from new device</p>
+      </div>
+
+      <!-- Card 5: Quick Actions -->
+      <div class="dashboard-card">
+        <h2>Quick Actions</h2>
+        <button class="soft-btn">Scan Inbox Now</button>
+        <button class="soft-btn">Download Threat Report</button>
+        <button class="soft-btn">Block Sender</button>
+      </div>
+
+      <!-- Card 6: Bonus Tips -->
+      <div class="dashboard-card">
+        <h2>Bonus Tips</h2>
+        <ul>
+          <li>✅ Hover to reveal full sender emails.</li>
+          <li>🚫 Don’t click unknown links.</li>
+          <li>🔒 Use 2FA wherever possible.</li>
+          <li><a href="#" class="learn-link">Read More in Learn &rarr;</a></li>
+        </ul>
+      </div>
     </div>
+    
   </div>
 </body>
 </html>
