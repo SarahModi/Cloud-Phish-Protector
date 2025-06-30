@@ -1,132 +1,107 @@
 :root {
-  --bg: #d3d3d3;
-  --text: #222;
-  --pink: #f5c2c2;
-  --card-bg: #1a1a1a;
-  --glow: rgba(0, 255, 255, 0.2);
-  --radius: 12px;
+  --bg-ash: #1e1e1e;
+  --surface: #252525;
+  --shadow-light: rgba(255, 255, 255, 0.05);
+  --shadow-dark: rgba(0, 0, 0, 0.3);
+  --accent: #f0c0f0;
+  --text-primary: #e0e0e0;
+  --text-muted: #888;
 }
 
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 body, html {
-  font-family: 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
   height: 100%;
+  background-color: var(--bg-ash);
+  font-family: 'Segoe UI', sans-serif;
+  color: var(--text-primary);
 }
 
-.app-container {
+#app {
   display: flex;
   height: 100vh;
-  overflow: hidden;
+  width: 100%;
 }
 
-/* Sidebar */
+/* SIDEBAR */
 .sidebar {
   width: 240px;
-  background: var(--bg);
+  background: var(--surface);
   padding: 2rem 1rem;
-  border-right: 1px solid #ccc;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  box-shadow: inset 5px 5px 15px var(--shadow-dark),
+              inset -5px -5px 15px var(--shadow-light);
 }
 
-.sidebar-header {
-  font-size: 1.4rem;
-  color: var(--text);
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 2rem;
+.sidebar h2 {
+  font-size: 1.2rem;
+  color: var(--accent);
+  text-align: center;
+  letter-spacing: 1px;
 }
 
-.nav-list {
-  list-style: none;
+.nav {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
 .nav-item {
-  padding: 0.8rem 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1rem;
   cursor: pointer;
-  color: var(--text);
-  border-radius: var(--radius);
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 5px 5px 10px var(--shadow-dark),
+              -5px -5px 10px var(--shadow-light);
 }
 
 .nav-item:hover,
 .nav-item.active {
-  background: var(--pink);
-  color: white;
+  color: var(--accent);
+  box-shadow: inset 3px 3px 8px var(--shadow-dark),
+              inset -3px -3px 8px var(--shadow-light);
 }
 
-/* Main Content */
-.main-content {
-  flex: 1;
+/* MAIN CONTENT */
+.main {
+  flex-grow: 1;
   padding: 2rem;
   overflow-y: auto;
 }
 
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+.main h1 {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--accent);
 }
 
-.card {
-  background: var(--card-bg);
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  color: white;
-  box-shadow:
-    4px 4px 8px rgba(0, 0, 0, 0.3),
-    -4px -4px 8px rgba(255, 255, 255, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow:
-    0 0 20px var(--glow),
-    0 0 40px var(--glow);
-}
-
-.card h3 {
-  color: var(--pink);
-  margin-bottom: 0.5rem;
-}
-
-.full-width {
-  grid-column: span 2;
-}
-
-.action-buttons {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
-}
-
-.neumorphic-btn {
-  background: var(--bg);
+/* NEUMORPHIC BUTTONS */
+.neu-button {
+  background: var(--surface);
+  color: var(--accent);
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: var(--radius);
-  box-shadow: 4px 4px 8px #bcbcbc, -4px -4px 8px #fff;
-  color: var(--text);
-  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
   cursor: pointer;
+  box-shadow: 5px 5px 15px var(--shadow-dark),
+              -5px -5px 15px var(--shadow-light);
   transition: all 0.2s ease;
+  margin-right: 1rem;
 }
 
-.neumorphic-btn:hover {
-  box-shadow:
-    0 0 10px var(--glow),
-    0 0 20px var(--glow);
+.neu-button:hover {
+  box-shadow: inset 3px 3px 10px var(--shadow-dark),
+              inset -3px -3px 10px var(--shadow-light);
+  transform: translateY(-2px);
 }
