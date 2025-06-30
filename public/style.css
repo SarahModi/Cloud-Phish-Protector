@@ -225,6 +225,51 @@ body {
   filter: blur(30px) drop-shadow(20px 20px 20px #fc5185);
 }
 
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 60px;
+  background-color: #202020;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  gap: 20px;
+  border-right: 2px solid #333;
+  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar-btn {
+  background-color: transparent;
+  color: #fff;
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.sidebar-btn:hover {
+  transform: translateY(-2px);
+  color: #fc5185;
+}
+
+.sidebar-btn.active {
+  color: #fc5185;
+}
+
+.sidebar-btn {
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.sidebar-btn svg {
+  display: block;
+  margin: auto;
+}
+
+
 @keyframes radar81 {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
