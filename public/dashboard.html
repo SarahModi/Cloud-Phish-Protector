@@ -4,172 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Phish Protector - Dashboard</title>
+
+  <!-- Fonts and External CSS -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background-color: #2c2a30;
-      color: #f7f7f7;
-      font-family: 'Inter', sans-serif;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: auto;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      color: #ffbfd9;
-      margin-bottom: 20px;
-    }
-
-    #results {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-
-    .card {
-      background: #3b3942;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-    }
-
-    .card p {
-      margin: 8px 0;
-      color: #ddd;
-    }
-
-    .card p span {
-      font-weight: 600;
-      color: #6ab3f8;
-    }
-
-    /* === Cute Radar Loader from Uiverse.io by adamgiebl === */
- #loadingScreen {
-  display: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  text-align: center;
-  gap: 20px;
-  color: #ffcde6;
-}
-
-#loadingScreen.active {
-  display: flex;
-  opacity: 1;
-}
-
-    .loader {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      background: transparent;
-      border-radius: 50%;
-      box-shadow: 25px 25px 75px rgba(0, 0, 0, 0.55);
-      border: 1px solid #333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .loader::before {
-      content: '';
-      position: absolute;
-      inset: 20px;
-      background: transparent;
-      border: 1px dashed #444;
-      border-radius: 50%;
-      box-shadow: inset -5px -5px 25px rgba(0, 0, 0, 0.25),
-                  inset 5px 5px 35px rgba(0, 0, 0, 0.25);
-    }
-
-    .loader::after {
-      content: '';
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 1px dashed #444;
-      box-shadow: inset -5px -5px 25px rgba(0, 0, 0, 0.25),
-                  inset 5px 5px 35px rgba(0, 0, 0, 0.25);
-    }
-
-    .loader span {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50%;
-      height: 100%;
-      background: transparent;
-      transform-origin: top left;
-      animation: radar81 2s linear infinite;
-      border-top: 1px dashed #fff;
-    }
-
-    .loader span::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #fc5185;
-      transform-origin: top left;
-      transform: rotate(-55deg);
-      filter: blur(30px) drop-shadow(20px 20px 20px #fc5185);
-    }
-
-    @keyframes radar81 {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>📬 Scan Results</h1>
 
-    <!-- 🔄 Loader While Scanning -->
-  <div id="loadingScreen">
-  <div class="loader"><span></span></div>
-  <p> Scanning emails...</p>
-</div>
+    <!-- 🔄 Cute Radar Loader -->
+    <div id="loadingScreen">
+      <div class="loader"><span></span></div>
+      <p>Scanning emails...</p>
+    </div>
 
+    <!-- 📋 Email Scan Results -->
     <div id="results-container" class="hidden"></div>
-
-    <!-- 📋 Results get added here -->
     <div id="results"></div>
   </div>
 
+  <!-- JS Script -->
   <script>
     const loadingScreen = document.getElementById('loadingScreen');
     const resultsContainer = document.getElementById('results');
 
-   function showLoader() {
-  loadingScreen.classList.add('active');
-  resultsContainer.style.display = 'none';
-}
+    function showLoader() {
+      loadingScreen.classList.add('active');
+      resultsContainer.style.display = 'none';
+    }
 
-function hideLoader() {
-  loadingScreen.classList.remove('active');
-  setTimeout(() => {
-    loadingScreen.style.display = 'none';
-    resultsContainer.style.display = 'grid';
-  }, 500); // wait for fade-out transition to finish
-}
+    function hideLoader() {
+      loadingScreen.classList.remove('active');
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+        resultsContainer.style.display = 'grid';
+      }, 500);
+    }
 
     async function fetchResults() {
       showLoader();
@@ -206,3 +77,4 @@ function hideLoader() {
   </script>
 </body>
 </html>
+
