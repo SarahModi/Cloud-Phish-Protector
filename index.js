@@ -133,7 +133,7 @@ app.get('/scan', async (req, res) => {
       const subject = headers.find(h => h.name === 'Subject')?.value || 'No Subject';
       const from = headers.find(h => h.name === 'From')?.value || 'Unknown Sender';
 
-      let body = '', links = [], risk = 'Safe';
+      let body = '', links = [], risk = '✅ Safe';
       const parts = msgData.data.payload.parts || [];
       const textPart = parts.find(p => p.mimeType === 'text/plain');
       if (textPart?.body?.data) {
@@ -143,24 +143,33 @@ app.get('/scan', async (req, res) => {
         for (const link of links) {
           const verdict = await checkLinkSafety(link);
           if (verdict === 'Dangerous') {
-            risk = 'Dangerous'; break;
-          } else if (verdict === 'Suspicious' && risk !== 'Dangerous') {
-            risk = 'Suspicious';
+            risk = '⚠️ Phishing'; break;
+          } else if (verdict === 'Suspicious' && risk !== '⚠️ Phishing') {
+            risk = '⚠️ Phishing';
           }
         }
       }
 
       if (isPhishing(subject, from, body)) {
-        risk = risk === 'Safe' ? 'Suspicious' : risk;
+        risk = risk === '✅ Safe' ? '⚠️ Phishing' : risk;
       }
 
-      results.push({ from, subject, riskLevel: risk, links });
+      results.push({
+        subject,
+        from,
+        status: risk,
+        reason: links.length > 0 ? `Links found: ${links.join(', ')}` : "No suspicious links"
+      });
     }
 
-    res.json({ status: 'ok', results });
+    // 🔁 CHANGED: respond with array, not object
+    res.json(results);
   } catch (err) {
     console.error('❌ Scan error:', err);
     res.status(500).json({ error: 'Scan failed' });
+  }
+});
+
   }
 });
 
