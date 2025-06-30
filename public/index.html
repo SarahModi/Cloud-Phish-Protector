@@ -1,95 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Phish Protector - Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
 
   <style>
     body {
-      background: #111;
-      color: #fefefe;
+      background: linear-gradient(to right, #f0f4ff, #d8e7ff);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      flex-direction: column;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .login-wrapper {
+      text-align: center;
     }
 
     .login-title {
-      font-size: 1.5rem;
+      font-size: 2rem;
       margin-bottom: 2rem;
+      color: #333;
     }
 
-    /* Tiny round button */
-    .button {
-      --bg-color: #111;
-      --main-color: #fefefe;
-      width: 40px;
-      height: 40px;
-      border-radius: 100%;
-      border: 2px solid var(--main-color);
-      background-color: var(--bg-color);
-      box-shadow: 4px 4px var(--main-color);
+    button {
+      max-width: 320px;
       display: flex;
-      justify-content: center;
+      padding: 0.5rem 1.4rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      vertical-align: middle;
       align-items: center;
-      transition: all 0.2s;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      gap: 0.75rem;
+      color: rgb(65, 63, 63);
+      background-color: #fff;
       cursor: pointer;
+      transition: all .6s ease;
       margin: 0 auto;
     }
 
-    .button:active {
-      box-shadow: 0px 0px var(--main-color);
-      transform: translate(3px, 3px);
+    button:hover {
+      transform: scale(1.02);
     }
 
-    .icon {
-      width: 24px;
+    .button svg {
       height: 24px;
-      fill: var(--main-color);
-    }
-
-    /* Full Google login button */
-    .full-login-button {
-      margin-top: 30px;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 14px;
-      background-color: white;
-      color: #333;
-      border: none;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .full-login-button:hover {
-      transform: scale(1.03);
     }
   </style>
 </head>
 <body>
-  <h1 class="login-title">Welcome to Phish Protector</h1>
+  <div class="login-wrapper">
+    <h1 class="login-title">Welcome to Phish Protector</h1>
 
-  <!-- Tiny Google Button -->
-  <button class="button" id="tiny-google-btn">
-    <svg class="icon" height="56.6934px" viewBox="0 0 56.6934 56.6934" xmlns="http://www.w3.org/2000/svg">
-      <path d="M51.981,24.4812c..."></path>
-    </svg>
-  </button>
-
-  <!-- Google Login Form (hidden at first) -->
-  <form action="/login" id="google-login-form" style="display:none;">
-    <button type="submit" class="full-login-button">Continue with Google</button>
-  </form>
-
-  <script>
-    document.getElementById('tiny-google-btn').addEventListener('click', () => {
-      document.getElementById('google-login-form').style.display = 'block';
-    });
-  </script>
+    <form action="/login">
+      <button type="submit" class="button">
+        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
+          <path fill="#4285F4" d="M255.878 133.451..."></path>
+          <path fill="#34A853" d="M130.55 261.1c35.248..."></path>
+          <path fill="#FBBC05" d="M56.281 156.37c-2.756..."></path>
+          <path fill="#EB4335" d="M130.55 50.479c24.514..."></path>
+        </svg>
+        Continue with Google
+      </button>
+    </form>
+  </div>
 </body>
 </html>
