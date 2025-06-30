@@ -89,15 +89,11 @@ app.get('/oauth2callback', async (req, res) => {
   try {
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
-    res.redirect(`/dashboard?state=${encodeURIComponent(state)}`);
+    res.redirect(`/dashboard.html?state=${encodeURIComponent(state)}`);
   } catch (err) {
     console.error('❌ OAuth flow error:', err);
     res.send(`<p style="color:red;">Something went wrong. Please try again later.</p>`);
   }
-});
-
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/scan', async (req, res) => {
@@ -161,8 +157,7 @@ app.get('/scan', async (req, res) => {
       results.push({ from, subject, riskLevel: risk, links });
     }
 
-    res.json({ results });
-
+    res.json({ status: 'ok', results });
   } catch (err) {
     console.error('❌ Scan error:', err);
     res.status(500).json({ error: 'Scan failed' });
