@@ -1,40 +1,99 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dashboard | Phish Protector</title>
+  <title>Phish Protector Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
-      background-color: #1e1e1e;
-      color: #fff;
+      background-color: #2c2a30;
+      color: #f7f7f7;
       font-family: 'Inter', sans-serif;
+      padding: 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px;
     }
     h1 {
-      color: #90d0ff;
+      color: #ffbfd9;
+      font-size: 32px;
+      margin-bottom: 20px;
     }
-    .status-card {
-      margin: 10px;
+    .status {
+      color: #ccc;
+      margin-bottom: 30px;
+    }
+    .email-card {
+      background: #3b3942;
+      margin-bottom: 15px;
       padding: 20px;
       border-radius: 12px;
-      background-color: #2e2e2e;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      width: 90%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      width: 100%;
       max-width: 600px;
     }
+    .email-card h3 {
+      color: #90d0ff;
+      margin-bottom: 10px;
+    }
+    .email-card p {
+      margin: 4px 0;
+    }
+    .safe { color: #7CFC00; }     /* Lime green */
+    .phishing { color: #FF6347; } /* Tomato red */
   </style>
 </head>
 <body>
-  <h1>Welcome to Your Dashboard</h1>
-  <p>Scans will appear here soon.</p>
 
-  <div class="status-card">
-    ✅ You are logged in and ready to scan emails!
-  </div>
+  <h1>📬 Scan Results</h1>
+  <p class="status">Checking your emails...</p>
+
+  <div id="results"></div>
+
+  <script>
+    function getStateParam() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("state");
+    }
+
+    async function fetchScanResults() {
+      const state = getStateParam();
+      const status = document.querySelector('.status');
+      const container = document.getElementById('results');
+
+      try {
+        const response = await fetch(`/scan?state=${encodeURIComponent(state)}`);
+        const data = await response.json();
+
+        status.textContent = `Scan Mode: ${state.split(":")[0].toUpperCase()}`;
+        container.innerHTML = "";
+
+        if (!data || data.length === 0) {
+          container.innerHTML = "<p>No emails found or scanned.</p>";
+          return;
+        }
+
+        data.forEach(email => {
+          const card = document.createElement('div');
+          card.className = "email-card";
+          const statusClass = email.status.includes("Safe") ? "safe" : "phishing";
+          card.innerHTML = `
+            <h3>${email.subject}</h3>
+            <p><strong>From:</strong> ${email.from}</p>
+            <p><strong>Status:</strong> <span class="${statusClass}">${email.status}</span></p>
+            <p><strong>Reason:</strong> ${email.reason}</p>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error("Error loading scan results:", err);
+        status.textContent = "❌ Failed to load scan results.";
+      }
+    }
+
+    window.onload = fetchScanResults;
+  </script>
 </body>
 </html>
