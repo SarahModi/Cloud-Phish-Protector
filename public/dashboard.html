@@ -2,98 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Phish Protector Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phish Protector - Dashboard</title>
   <style>
     body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1f1d24;
+      color: #f0f0f0;
       margin: 0;
-      background-color: #2c2a30;
-      color: #f7f7f7;
-      font-family: 'Inter', sans-serif;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding: 20px;
     }
     h1 {
-      color: #ffbfd9;
-      font-size: 32px;
-      margin-bottom: 20px;
+      text-align: center;
+      color: #6ab3f8;
     }
-    .status {
-      color: #ccc;
-      margin-bottom: 30px;
-    }
-    .email-card {
-      background: #3b3942;
-      margin-bottom: 15px;
+    .card {
+      background: #2c2a30;
+      border-radius: 16px;
       padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      width: 100%;
+      margin: 20px auto;
       max-width: 600px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
-    .email-card h3 {
-      color: #90d0ff;
+    .card h2 {
+      font-size: 18px;
+      color: #80d0ff;
       margin-bottom: 10px;
     }
-    .email-card p {
-      margin: 4px 0;
+    .card p {
+      font-size: 14px;
+      margin: 6px 0;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
     }
-    .safe { color: #7CFC00; }     /* Lime green */
-    .phishing { color: #FF6347; } /* Tomato red */
+    .card a {
+      color: #8fd3ff;
+      text-decoration: underline;
+    }
+    .status {
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-
   <h1>📬 Scan Results</h1>
-  <p class="status">Checking your emails...</p>
 
   <div id="results"></div>
 
   <script>
-    function getStateParam() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("state");
-    }
+    async function loadResults() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const state = urlParams.get('state') || 'inbox:';
+      const response = await fetch(`/scan?state=${encodeURIComponent(state)}`);
+      const data = await response.json();
 
-    async function fetchScanResults() {
-      const state = getStateParam();
-      const status = document.querySelector('.status');
-      const container = document.getElementById('results');
+      const resultsDiv = document.getElementById('results');
+      if (!Array.isArray(data)) {
+        resultsDiv.innerHTML = `<p style="color: red;">Error: ${data.error || 'Unknown problem'}</p>`;
+        return;
+      }
 
-      try {
-        const response = await fetch(`/scan?state=${encodeURIComponent(state)}`);
-        const data = await response.json();
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
-        status.textContent = `Scan Mode: ${state.split(":")[0].toUpperCase()}`;
-        container.innerHTML = "";
+        const links = (item.reason.includes('Links found') && item.reason.match(/https?:\/\/\S+/g)) || [];
+        let reasonHtml = item.reason;
 
-        if (!data || data.length === 0) {
-          container.innerHTML = "<p>No emails found or scanned.</p>";
-          return;
+        if (links.length > 0) {
+          links.forEach(link => {
+            const safeLink = `<a href="${link}" target="_blank" rel="noopener noreferrer">${link}</a>`;
+            reasonHtml = reasonHtml.replace(link, safeLink);
+          });
         }
 
-        data.forEach(email => {
-          const card = document.createElement('div');
-          card.className = "email-card";
-          const statusClass = email.status.includes("Safe") ? "safe" : "phishing";
-          card.innerHTML = `
-            <h3>${email.subject}</h3>
-            <p><strong>From:</strong> ${email.from}</p>
-            <p><strong>Status:</strong> <span class="${statusClass}">${email.status}</span></p>
-            <p><strong>Reason:</strong> ${email.reason}</p>
-          `;
-          container.appendChild(card);
-        });
-
-      } catch (err) {
-        console.error("Error loading scan results:", err);
-        status.textContent = "❌ Failed to load scan results.";
-      }
+        card.innerHTML = `
+          <h2>${item.subject}</h2>
+          <p><strong>From:</strong> ${item.from}</p>
+          <p><strong>Status:</strong> <span class="status">${item.status}</span></p>
+          <p class="reason"><strong>Reason:</strong> ${reasonHtml}</p>
+        `;
+        resultsDiv.appendChild(card);
+      });
     }
 
-    window.onload = fetchScanResults;
+    loadResults();
   </script>
 </body>
 </html>
