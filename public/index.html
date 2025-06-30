@@ -1,136 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Phish Protector</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Phish Protector - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background-color: #2c2a30;
-      color: #f7f7f7;
-      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #f0f4ff, #d8e7ff);
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+      height: 100vh;
+      font-family: 'Inter', sans-serif;
     }
-    .card {
-      background: #3b3942;
-      border-radius: 16px;
-      padding: 30px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+
+    .login-wrapper {
       text-align: center;
     }
-    h1 {
-      font-size: 28px;
-      color: #ffbfd9;
-      margin-bottom: 10px;
+
+    .login-title {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: #333;
     }
-    p {
-      font-size: 14px;
-      color: #ccc;
-      margin-bottom: 30px;
-    }
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 12px 0;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-    }
-    select {
-      background: #504d56;
-      color: #fff;
-    }
+
     button {
-      background: #6ab3f8;
-      color: #1e1e1e;
-      font-weight: 600;
+      max-width: 320px;
+      display: flex;
+      padding: 0.5rem 1.4rem;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      vertical-align: middle;
+      align-items: center;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+      gap: 0.75rem;
+      color: rgb(65, 63, 63);
+      background-color: #fff;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all .6s ease;
+      margin: 0 auto;
     }
+
     button:hover {
-      background: #90d0ff;
+      transform: scale(1.02);
     }
-    .footer {
-      margin-top: 30px;
-      font-size: 12px;
-      color: #999;
+
+    .button svg {
+      height: 24px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Phish Protector</h1>
-    <p>Stay ahead of threats. Scan your emails instantly & securely.</p>
+  <div class="login-wrapper">
+    <h1 class="login-title">Welcome to Phish Protector</h1>
 
-       <select id="scan-mode" onchange="showDialogIfNeeded(this.value)">
-      <option value="inbox">📥 Scan Inbox</option>
-      <option value="junk">🗑️ Scan Junk</option>
-      <option value="specific">🔍 Scan Specific Email</option>
-    </select>
-
-    <button onclick="handleLogin()">🔐 Login with Gmail</button>
-
-    <div class="footer">
-      Built with ❤️ by Ro'eh · v1.0
-    </div>
+    <form action="/login">
+      <button type="submit" class="button">
+        <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
+          <path fill="#4285F4" d="M255.878 133.451..."></path>
+          <path fill="#34A853" d="M130.55 261.1c35.248..."></path>
+          <path fill="#FBBC05" d="M56.281 156.37c-2.756..."></path>
+          <path fill="#EB4335" d="M130.55 50.479c24.514..."></path>
+        </svg>
+        Continue with Google
+      </button>
+    </form>
   </div>
-
-  <script>
-  function showDialogIfNeeded(mode) {
-    if (mode === 'specific') {
-      fetch('/recent-emails')
-        .then(res => res.json())
-        .then(data => {
-          const emailSelect = document.getElementById('emailSelect');
-          emailSelect.innerHTML = '';
-          data.forEach(email => {
-            const option = document.createElement('option');
-            option.value = email.id;
-            option.textContent = `${email.subject} — ${email.from}`;
-            emailSelect.appendChild(option);
-          });
-          document.getElementById('emailDialog').style.display = 'block';
-        });
-    }
-  }
-
-  function cancelDialog() {
-    document.getElementById('emailDialog').style.display = 'none';
-    document.getElementById('scan-mode').value = 'inbox'; // reset
-  }
-
-  function confirmEmailSelection() {
-    const emailId = document.getElementById('emailSelect').value;
-    window.location.href = `/auth?mode=specific&emailId=${emailId}`;
-  }
-
-  function handleLogin() {
-    const mode = document.getElementById('scan-mode').value;
-    if (mode !== 'specific') {
-      window.location.href = `/auth?mode=${mode}`;
-    }
-  }
-
-  </script>
-    <div id="emailDialog" style="display: none; position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: #3b3942; color: white; padding: 20px; border-radius: 12px; width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); z-index: 999;">
-    <h3 style="margin-bottom: 10px;">Choose an email to scan:</h3>
-    <select id="emailSelect" style="width: 100%; padding: 8px; background: #504d56; color: #fff; border: none; border-radius: 6px;">
-      <option>Loading...</option>
-    </select>
-    <div style="margin-top: 15px; display: flex; justify-content: space-between;">
-      <button onclick="cancelDialog()" style="background: gray;">Cancel</button>
-      <button onclick="confirmEmailSelection()">Scan</button>
-    </div>
-  </div>
-
 </body>
 </html>
