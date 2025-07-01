@@ -44,7 +44,7 @@ body, html {
 
 .sidebar h2 {
   font-size: 1.2rem;
-  color: var(--accent);
+  color: #e971ff;
   text-align: center;
   letter-spacing: 1px;
 }
@@ -58,7 +58,7 @@ body, html {
 .nav-item {
   padding: 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: #d0a4f5;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -71,7 +71,7 @@ body, html {
 
 .nav-item:hover,
 .nav-item.active {
-  color: var(--accent);
+  color: #f08aff;
   box-shadow: inset 3px 3px 8px var(--shadow-dark),
               inset -3px -3px 8px var(--shadow-light);
 }
