@@ -92,8 +92,37 @@ document.addEventListener('DOMContentLoaded', () => {
         : "<li>No threats found.</li>";
     }
 
-    // 📈 Optional: Load fake chart
-    if (window.loadFakeChart) loadFakeChart(blocked, safe);
+  // 📈 Load real Chart.js donut chart
+const ctx = document.getElementById('riskPieChart')?.getContext('2d');
+if (ctx) {
+  if (window.riskChart) window.riskChart.destroy(); // 🔁 Prevent overlap
+
+  window.riskChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Safe', 'Phishing'],
+      datasets: [{
+        data: [safe, blocked],
+        backgroundColor: ['#cc77f2', '#f08aff'], // 💜 Safe, 💗 Phishing
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: '70%',
+      plugins: {
+        legend: {
+          labels: {
+            color: '#eee',
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
   };
 
   // ✨ HTML Safe
