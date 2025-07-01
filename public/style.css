@@ -106,44 +106,49 @@ body, html {
               inset -3px -3px 10px var(--shadow-light);
   transform: translateY(-2px);
 }
+/* DARK NEUMORPHIC DASHBOARD CARDS */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* Two cards per row */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 2rem;
   padding: 2rem;
 }
 
 .dashboard-card {
-  background: #f2f2f2;
-  color: #333;
+  background: #1f1f1f;
   border-radius: 20px;
-  padding: 2rem; /* Slightly more padding */
-  font-size: 1.05rem; /* Slightly bigger text */
-  box-shadow: 10px 10px 10px #d1d1d1, -10px -10px 10px #ffffff;
+  padding: 1.5rem;
+  box-shadow: 
+    8px 8px 15px #141414, 
+    -8px -8px 15px #262626;
   transition: all 0.3s ease;
+  color: #eee;
+  position: relative;
 }
 
-
 .dashboard-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 4px 4px 12px #e0e0e0, -4px -4px 12px #f5f5f5;
+  transform: translateY(-3px);
+  box-shadow: 
+    inset 4px 4px 10px #141414, 
+    inset -4px -4px 10px #262626;
 }
 
 .dashboard-card h2 {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   margin-bottom: 1rem;
-  color: #222;
+  color: #cc77f2;
+  letter-spacing: 0.5px;
 }
 
-.dashboard-card ul {
-  list-style: none;
-  padding-left: 0;
+.dashboard-card ul, 
+.dashboard-card p {
+  font-size: 0.95rem;
+  color: #bbb;
 }
 
 .dashboard-card li {
-  padding: 0.5rem 0;
-  font-size: 0.95rem;
-  border-bottom: 1px dashed #ccc;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed #333;
 }
 
 .dashboard-card li:last-child {
@@ -151,33 +156,33 @@ body, html {
 }
 
 .soft-btn {
-  margin-top: 1rem;
-  background: #f2f2f2;
+  background: #1f1f1f;
+  color: #f08aff;
   border: none;
   padding: 0.6rem 1rem;
   border-radius: 12px;
-  box-shadow: 6px 6px 15px #d1d1d1, -6px -6px 15px #ffffff;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 
+    5px 5px 10px #141414, 
+    -5px -5px 10px #262626;
 }
 
 .soft-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 4px 4px 12px #ccc, -4px -4px 12px #fff;
-  background: #eeeeee;
+  box-shadow: 
+    inset 3px 3px 8px #141414, 
+    inset -3px -3px 8px #262626;
 }
 
+/* Link inside tips card */
 .learn-link {
   display: inline-block;
-  margin-top: 0.75rem;
-  color: #d28da3;
-  font-weight: bold;
+  color: #e971ff;
+  margin-top: 0.5rem;
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
 .learn-link:hover {
-  color: #ff9eb7;
+  color: #ffafff;
 }
-
