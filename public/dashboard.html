@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Neumorphic Dashboard</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
   <div id="app">
@@ -22,26 +24,32 @@
     
     <!-- Main Dashboard Content -->
     <div class="dashboard-grid">
-      <!-- Card 1: Recent Scans -->
+      
+      <!-- Card 1: Recent Email Scans (Dynamic) -->
       <div class="dashboard-card">
         <h2>Recent Email Scans</h2>
-        <ul>
-          <li><strong>From:</strong> hr@company.com — ✅ Safe</li>
-          <li><strong>From:</strong> unknown@phish.com — ⚠️ Threat</li>
-          <li><strong>From:</strong> support@bank.com — ✅ Safe</li>
+        <ul id="scan-results">
+          <li>Loading scan results...</li>
         </ul>
       </div>
 
       <!-- Card 2: Threat Stats -->
-     <!-- Card with fake chart -->
-<div class="dashboard-card">
-  <h2>Email Threat Chart</h2>
-  <div style="width: 100%; height: 150px; background: linear-gradient(90deg, #a855f7, #ec4899); border-radius: 10px; margin-top: 1rem;"></div>
-  <p style="margin-top: 1rem; font-size: 0.9rem;">Most threats were detected from unknown domains this week.</p>
-</div>
+      <div class="dashboard-card">
+        <h2>Threat Summary</h2>
+       <canvas id="riskPieChart" width="150" height="150" style="margin-bottom: 1rem;"></canvas>
+<p>Total Scanned: <strong id="scan-count">0</strong></p>
+<p>Last Scan: <strong id="last-scan-time">Just now</strong></p>
 
+      </div>
 
-      <!-- Card 3: Threat Logs -->
+      <!-- Card 3: Threat Chart (Placeholder Style) -->
+      <div class="dashboard-card">
+        <h2>Email Threat Chart</h2>
+        <div style="width: 100%; height: 150px; background: linear-gradient(90deg, #a855f7, #ec4899); border-radius: 10px; margin-top: 1rem;"></div>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Most threats were detected from unknown domains this week.</p>
+      </div>
+
+      <!-- Card 4: Threat Logs (Static) -->
       <div class="dashboard-card">
         <h2>Threat Log</h2>
         <ul>
@@ -52,22 +60,22 @@
         <button class="soft-btn">View Full Log</button>
       </div>
 
-      <!-- Card 4: Alerts -->
+      <!-- Card 5: Alerts -->
       <div class="dashboard-card">
         <h2>Alerts</h2>
         <p>⚠️ 2 new phishing attempts blocked today</p>
         <p>🔐 Suspicious login from new device</p>
       </div>
 
-      <!-- Card 5: Quick Actions -->
+      <!-- Card 6: Quick Actions -->
       <div class="dashboard-card">
         <h2>Quick Actions</h2>
-        <button class="soft-btn">Scan Inbox Now</button>
-        <button class="soft-btn">Download Threat Report</button>
-        <button class="soft-btn">Block Sender</button>
+        <button class="soft-btn" onclick="loadEmailScanResults()">🔄 Scan Inbox Now</button>
+        <button class="soft-btn">📥 Download Threat Report</button>
+        <button class="soft-btn">🚫 Block Sender</button>
       </div>
 
-      <!-- Card 6: Bonus Tips -->
+      <!-- Card 7: Bonus Tips -->
       <div class="dashboard-card">
         <h2>Bonus Tips</h2>
         <ul>
@@ -78,7 +86,45 @@
         </ul>
       </div>
     </div>
-    
   </div>
+
+  <!-- JavaScript for Real-Time Gmail Data -->
+  <script>
+    async function loadEmailScanResults() {
+      try {
+        const res = await fetch('/scan?state=inbox:');
+        const data = await res.json();
+
+        const scanList = document.getElementById('scan-results');
+        const scanCount = document.getElementById('scan-count');
+        const phishingCount = document.getElementById('phishing-count');
+        const riskLevel = document.getElementById('risk-level');
+        const lastScan = document.getElementById('last-scan-time');
+
+        scanList.innerHTML = '';
+
+        let phishing = 0;
+
+        data.forEach(email => {
+          const li = document.createElement('li');
+          li.innerHTML = `<strong>From:</strong> ${email.from} — ${email.status}<br><strong>Subject:</strong> ${email.subject}`;
+          scanList.appendChild(li);
+          if (email.status.includes("Phishing")) phishing++;
+        });
+
+        scanCount.textContent = data.length;
+        phishingCount.textContent = phishing;
+        riskLevel.textContent = phishing >= 3 ? 'High' : phishing === 0 ? 'Low' : 'Medium';
+        riskLevel.style.color = phishing >= 3 ? 'red' : phishing === 0 ? 'green' : 'orange';
+        lastScan.textContent = new Date().toLocaleString();
+
+      } catch (error) {
+        console.error('Failed to fetch scan data:', error);
+        document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
+      }
+    }
+
+    window.addEventListener('load', loadEmailScanResults);
+  </script>
 </body>
 </html>
