@@ -33,7 +33,7 @@ body, html {
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh; /* Full viewport height */
+  height: 100vh; /* full screen height */
   width: 240px;
   background: var(--surface);
   padding: 2rem 1rem;
@@ -42,8 +42,10 @@ body, html {
   gap: 2rem;
   box-shadow: inset 5px 5px 15px var(--shadow-dark),
               inset -5px -5px 15px var(--shadow-light);
-
+  overflow-y: auto;
+  z-index: 1000;
 }
+
 
 .sidebar h2 {
   font-size: 1.2rem;
@@ -120,6 +122,7 @@ body, html {
   grid-template-columns: repeat(2, 1fr); /* 👈 Only 2 columns */
   gap: 2rem;
   padding: 2rem;
+  margin-left: 240px; /* Push content to the right, same as sidebar width */
 }
 
 .dashboard-card {
