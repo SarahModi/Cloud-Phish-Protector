@@ -3,7 +3,10 @@
   --surface: #252525;
   --shadow-light: rgba(255, 255, 255, 0.05);
   --shadow-dark: rgba(0, 0, 0, 0.3);
-  --accent: #f0c0f0;
+  --accent-pink: #f08aff;
+  --accent-purple: #cc77f2;
+}
+
   --text-primary: #e0e0e0;
   --text-muted: #888;
 }
