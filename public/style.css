@@ -30,6 +30,10 @@ body, html {
 
 /* SIDEBAR */
 .sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh; /* Full viewport height */
   width: 240px;
   background: var(--surface);
   padding: 2rem 1rem;
@@ -38,6 +42,7 @@ body, html {
   gap: 2rem;
   box-shadow: inset 5px 5px 15px var(--shadow-dark),
               inset -5px -5px 15px var(--shadow-light);
+
 }
 
 .sidebar h2 {
