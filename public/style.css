@@ -5,8 +5,6 @@
   --shadow-dark: rgba(0, 0, 0, 0.3);
   --accent-pink: #f08aff;
   --accent-purple: #cc77f2;
-}
-
   --text-primary: #e0e0e0;
   --text-muted: #888;
 }
@@ -86,13 +84,15 @@ body, html {
 .main h1 {
   font-size: 2rem;
   margin-bottom: 2rem;
-  color: var(--accent);
+  color: var(--accent-pink); /* or purple */
+}
+
 }
 
 /* NEUMORPHIC BUTTONS */
 .neu-button {
   background: var(--surface);
-  color: var(--accent);
+ color: var(--accent-purple);
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 12px;
@@ -112,7 +112,7 @@ body, html {
 /* DARK NEUMORPHIC DASHBOARD CARDS */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(2, 1fr); /* 👈 Only 2 columns */
   gap: 2rem;
   padding: 2rem;
 }
