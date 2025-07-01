@@ -116,8 +116,12 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: ['Safe', 'Phishing'],
         datasets: [{
           data: [safe, phishing],
-          backgroundColor: ['#cc77f2', '#f08aff'], // 💜 Safe, 💗 Phishing
-          borderWidth: 0
+         borderColor: '#1f1f1f',
+          borderWidth: 2,
+         backgroundColor: ['#a855f7', '#ec4899'], // 💜 clearer purple, 💗 hot pink
+           hoverOffset: 10
+          
+
         }]
       },
       options: {
