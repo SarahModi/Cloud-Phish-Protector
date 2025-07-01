@@ -124,39 +124,40 @@
       }
     }
 
-    function drawRiskChart(total, phishing) {
-      const safe = total - phishing;
-      const ctx = document.getElementById('riskPieChart').getContext('2d');
+   function drawRiskChart(total, phishing) {
+  const safe = total - phishing;
+  const ctx = document.getElementById('riskPieChart').getContext('2d');
 
-      if (window.riskChart) {
-        window.riskChart.destroy();
-      }
+  if (window.riskChart) {
+    window.riskChart.destroy();
+  }
 
-      window.riskChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Safe', 'Phishing'],
-          datasets: [{
-            data: [safe, phishing],
-            backgroundColor: ['#10b981', '#ef4444'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          cutout: '65%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: '#eee',
-                padding: 15
-              }
-            }
+  window.riskChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Safe', 'Phishing'],
+      datasets: [{
+        data: [safe, phishing],
+        backgroundColor: ['#a855f7', '#ec4899'], // 💜💗 New colors
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#eee',
+            padding: 15
           }
         }
-      });
+      }
     }
+  });
+}
+
 
     window.addEventListener('load', loadEmailScanResults);
   </script>
