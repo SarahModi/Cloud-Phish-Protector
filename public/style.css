@@ -54,15 +54,16 @@ body, html {
 
 .nav-item {
   padding: 1rem;
-  background: var(--surface);
-  border-radius: 12px;
   text-align: center;
   color: var(--text-muted);
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 5px 5px 10px var(--shadow-dark),
-              -5px -5px 10px var(--shadow-light);
+  box-shadow: 8px 8px 16px var(--shadow-dark),
+              -8px -8px 16px var(--shadow-light);
+  border-radius: 14px;
+  background: var(--surface);
+  transition: all 0.25s ease-in-out;
 }
 
 .nav-item:hover,
@@ -118,14 +119,14 @@ body, html {
   border-radius: 20px;
   padding: 2rem; /* Slightly more padding */
   font-size: 1.05rem; /* Slightly bigger text */
-  box-shadow: 10px 10px 30px #d1d1d1, -10px -10px 30px #ffffff;
+  box-shadow: 10px 10px 10px #d1d1d1, -10px -10px 10px #ffffff;
   transition: all 0.3s ease;
 }
 
 
 .dashboard-card:hover {
   transform: translateY(-5px);
-  box-shadow: 8px 8px 20px #ccc, -8px -8px 20px #fff;
+  box-shadow: 4px 4px 12px #e0e0e0, -4px -4px 12px #f5f5f5;
 }
 
 .dashboard-card h2 {
