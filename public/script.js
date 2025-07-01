@@ -134,6 +134,50 @@ if (ctx) {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   };
+  
+const drawThreatFrequencyChart = (emails) => {
+  const ctx = document.getElementById('threatBarChart')?.getContext('2d');
+  if (!ctx) return;
+
+  const frequency = {};
+
+  emails.forEach(email => {
+    if (email.status.includes('Phishing')) {
+      const date = new Date(email.timestamp || Date.now()).toISOString().split('T')[0];
+      frequency[date] = (frequency[date] || 0) + 1;
+    }
+  });
+
+  const labels = Object.keys(frequency).sort();
+  const data = labels.map(date => frequency[date]);
+
+  if (window.threatChart) window.threatChart.destroy(); // prevent overlapping chart
+
+  window.threatChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Phishing Emails',
+        data,
+        backgroundColor: 'rgba(240, 138, 255, 0.7)', // 💗 soft pink
+        borderColor: 'rgba(204, 119, 242, 1)',       // 💜 soft purple
+        borderWidth: 2,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { ticks: { color: '#eee' } },
+        y: { beginAtZero: true, ticks: { color: '#eee' } }
+      },
+      plugins: {
+        legend: { labels: { color: '#eee' } }
+      }
+    }
+  });
+};
 
   handleAppFlow();
 });
