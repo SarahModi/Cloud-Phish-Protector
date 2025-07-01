@@ -123,8 +123,15 @@
         document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
       }
     }
+    drawRiskChart(data.length, phishing);
+    drawThreatFrequencyChart(data); // ✅ Don't forget this!
+  } catch (error) {
+    console.error('Failed to fetch scan data:', error);
+    document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
+  }
+}
 
-   function drawRiskChart(total, phishing) {
+function drawRiskChart(total, phishing) {
   const safe = total - phishing;
   const ctx = document.getElementById('riskPieChart').getContext('2d');
 
@@ -138,8 +145,8 @@
       labels: ['Safe', 'Phishing'],
       datasets: [{
         data: [safe, phishing],
-        backgroundColor: ['#a855f7', '#ec4899'], // 💜💗 New colors
-        borderWidth: 0
+        backgroundColor: ['#a855f7', '#ec4899'], // 💜💗 Purple-pink
+        borderWidth: 1
       }]
     },
     options: {
@@ -158,8 +165,7 @@
   });
 }
 
-
-    window.addEventListener('load', loadEmailScanResults);
+window.addEventListener('load', loadEmailScanResults);
   </script>
 
   <!-- External script file if needed -->
