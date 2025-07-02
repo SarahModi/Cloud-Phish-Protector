@@ -28,6 +28,26 @@ body, html {
   width: 100%;
 }
 
+#scan-results {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+#scan-results li {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.6rem;
+  border-radius: 10px;
+  line-height: 1.5;
+}
+
+
+
 /* SIDEBAR */
 .sidebar {
   position: fixed;
