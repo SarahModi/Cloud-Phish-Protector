@@ -140,7 +140,7 @@ function drawRiskChart(total, phishing) {
   }
 
   window.riskChart = new Chart(ctx, {
-    type: 'doughnut',
+    type: 'bar',
     data: {
       labels: ['Safe', 'Phishing'],
       datasets: [{
