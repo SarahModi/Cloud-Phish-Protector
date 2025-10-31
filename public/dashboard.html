@@ -9,12 +9,12 @@
 </head>
 <body>
   <div id="app">
-    <!-- Sidebar - SIMPLIFIED -->
+    <!-- Sidebar - WITH CLICK HANDLERS -->
     <div class="sidebar">
       <h2>Threat Protector</h2>
       <div class="nav">
-        <div class="nav-item active">Email Security</div>
-        <div class="nav-item">Password Health</div>
+        <div class="nav-item active" onclick="switchTab('email')">Email Security</div>
+        <div class="nav-item" onclick="switchTab('password')">Password Health</div>
       </div>
     </div>
     
@@ -49,10 +49,114 @@
       </div>
 
     </div>
+
+    <!-- Password Health Tab Content -->
+    <div class="dashboard-grid" id="password-health-tab" style="display: none;">
+
+      <!-- Card 1: Password Reuse -->
+      <div class="dashboard-card">
+        <h2>Password Reuse</h2>
+        <div id="reuse-results">
+          <div class="password-risk high">
+            <strong>"password123"</strong> used on <strong>5 sites</strong>
+            <div class="sites-list">facebook.com, twitter.com, instagram.com, gmail.com, netflix.com</div>
+          </div>
+          <div class="password-risk medium">
+            <strong>"Summer2024!"</strong> used on <strong>3 sites</strong>
+            <div class="sites-list">amazon.com, paypal.com, spotify.com</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Smart Password Generator -->
+      <div class="dashboard-card">
+        <h2>🔧 Smart Password Generator</h2>
+        <input type="text" id="password-words" placeholder="Enter words you'll remember (e.g., cat, blue, 2007)" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #444; border-radius: 8px; background: #2a2a2a; color: white;">
+        <button class="scan-btn" onclick="generateSmartPassword()" style="width: 100%;">Generate Secure Password</button>
+        <div id="password-options" style="margin-top: 20px;"></div>
+      </div>
+
+    </div>
   </div>
 
   <!-- JavaScript -->
   <script>
+    // TAB SWITCHING FUNCTIONALITY - ADD THIS FIRST
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.dashboard-grid').forEach(tab => {
+        tab.style.display = 'none';
+      });
+      
+      // Remove active class from all nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Show selected tab and set active
+      if (tabName === 'email') {
+        document.querySelector('.dashboard-grid').style.display = 'grid';
+        document.querySelectorAll('.nav-item')[0].classList.add('active');
+      } else {
+        document.getElementById('password-health-tab').style.display = 'grid';
+        document.querySelectorAll('.nav-item')[1].classList.add('active');
+      }
+    }
+
+    // PASSWORD GENERATOR - ADD THIS
+    function generateSmartPassword() {
+      const userInput = document.getElementById('password-words').value;
+      if (!userInput) {
+        alert('Please enter some words to include in your password!');
+        return;
+      }
+      
+      const words = userInput.split(',').map(word => word.trim()).filter(word => word.length > 0);
+      
+      if (words.length < 2) {
+        alert('Please enter at least 2 words (e.g., "cat, blue, 2007")');
+        return;
+      }
+      
+      // Generate password options
+      const passwords = [
+        `${transformWord(words[0])}${transformWord(words[1])}!${words[2] || '2024'}`,
+        `${words[2] || '2024'}_${transformWord(words[0])}_${transformWord(words[1])}!`,
+        `$${transformWord(words[0])}${transformWord(words[1])}${words[2] || '24'}`
+      ];
+      
+      // Display options
+      const optionsDiv = document.getElementById('password-options');
+      optionsDiv.innerHTML = '<h3>🔒 Generated Passwords:</h3>' + 
+        passwords.map((pass, index) => `
+          <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 8px; border-left: 4px solid #a855f7;">
+            <strong>Option ${index + 1}:</strong> <code style="font-size: 16px;">${pass}</code>
+            <button onclick="copyPassword('${pass}')" style="margin-left: 10px; padding: 5px 10px; background: #a855f7; border: none; border-radius: 4px; color: white; cursor: pointer;">📋 Copy</button>
+          </div>
+        `).join('');
+    }
+
+    function transformWord(word) {
+      const transformations = {
+        'a': '@', 'e': '3', 'i': '!', 'o': '0', 's': '$',
+        'l': '1', 't': '7'
+      };
+      
+      let transformed = word.toLowerCase();
+      for (const [key, value] of Object.entries(transformations)) {
+        transformed = transformed.replace(new RegExp(key, 'g'), value);
+      }
+      
+      // Capitalize first letter
+      return transformed.charAt(0).toUpperCase() + transformed.slice(1);
+    }
+
+    function copyPassword(password) {
+      navigator.clipboard.writeText(password);
+      alert('✅ Password copied to clipboard!');
+    }
+
+    // YOUR EXISTING EMAIL SCANNING CODE
     async function loadEmailScanResults() {
       try {
         const res = await fetch('/scan?state=inbox:');
@@ -97,7 +201,6 @@
       }
     }
 
-    // Explain WHY something is dangerous
     function getThreatReason(email) {
       if (email.from.includes('amaz0n') || email.from.includes('paypa1')) {
         return "Fake company domain (typosquatting)";
