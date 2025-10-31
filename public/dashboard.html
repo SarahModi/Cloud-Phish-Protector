@@ -13,78 +13,45 @@
     <div class="sidebar">
       <h2>Threat Protector</h2>
       <div class="nav">
-        <div class="nav-item active">Dashboard</div>
-        <!-- REMOVED: Profile, Learn, Settings -->
+        <div class="nav-item active">Email Security</div>
+        <div class="nav-item">Password Health</div>
       </div>
     </div>
     
-    <!-- Main Dashboard Content -->
+    <!-- Email Security Tab Content -->
     <div class="dashboard-grid">
 
-      <!-- Card 1: Recent Scans -->
+      <!-- Card 1: Email Scan Results (MAIN FOCUS) -->
       <div class="dashboard-card">
-        <h2>Recent Email Scans</h2>
+        <h2>Email Scan Results</h2>
+        <div class="scan-stats">
+          <div class="stat safe">Safe: <strong>47</strong></div>
+          <div class="stat suspicious">Suspicious: <strong>3</strong></div>
+          <div class="stat dangerous">Dangerous: <strong>2</strong></div>
+        </div>
         <ul id="scan-results">
-          <li>Loading scan results...</li>
+          <li>Loading emails...</li>
         </ul>
       </div>
 
-      <!-- Card 2: Threat Summary -->
+      <!-- Card 2: Protection Summary (SIMPLIFIED) -->
       <div class="dashboard-card">
-        <h2>Threat Summary</h2>
-        <canvas id="riskPieChart" width="150" height="150" style="margin-bottom: 1rem;"></canvas>
-        <p>Total Scanned: <strong id="scan-count">0</strong></p>
-        <p>Threats Blocked: <strong id="phishing-count">0</strong></p>
-        <p>Risk Level: <strong id="risk-level">--</strong></p>
-        <p>Last Scan: <strong id="last-scan-time">Just now</strong></p>
+        <h2>Protection Summary</h2>
+        <div class="protection-status">
+          <p>Total Scanned: <strong id="scan-count">0</strong></p>
+          <p>Threats Blocked: <strong id="phishing-count">0</strong></p>
+          <p>Risk Level: <strong id="risk-level">--</strong></p>
+          <p>Last Scan: <strong id="last-scan-time">Just now</strong></p>
+        </div>
+        <button class="scan-btn" onclick="loadEmailScanResults()">
+          Scan Inbox Now
+        </button>
       </div>
 
-      <!-- Card 3: Threat Chart -->
-      <div class="dashboard-card">
-        <h2>Email Threat Chart</h2>
-        <canvas id="threatBarChart" width="300" height="150"></canvas>
-        <p style="margin-top: 1rem; font-size: 0.9rem;">Tracks how many phishing threats were detected daily.</p>
-      </div>
-
-      <!-- Card 4: Threat Logs -->
-      <div class="dashboard-card">
-        <h2>Threat Log</h2>
-        <ul>
-          <li>Invoice Scam — Blocked</li>
-          <li>Fake Dropbox — Alerted</li>
-          <li>Password Reset Phish — Deleted</li>
-        </ul>
-        <button class="soft-btn">View Full Log</button>
-      </div>
-
-      <!-- Card 5: Alerts -->
-      <div class="dashboard-card">
-        <h2>Alerts</h2>
-        <p>⚠️ 2 new phishing attempts blocked today</p>
-        <p>🔐 Suspicious login from new device</p>
-      </div>
-
-      <!-- Card 6: Quick Actions -->
-      <div class="dashboard-card">
-        <h2>Quick Actions</h2>
-        <button class="soft-btn" onclick="loadEmailScanResults()">🔄 Scan Inbox Now</button>
-        <button class="soft-btn">📥 Download Threat Report</button>
-        <button class="soft-btn">🚫 Block Sender</button>
-      </div>
-
-      <!-- Card 7: Security Tips -->
-      <div class="dashboard-card">
-        <h2>Security Tips</h2>
-        <ul>
-          <li>✅ Hover to reveal full sender emails.</li>
-          <li>🚫 Don't click unknown links.</li>
-          <li>🔒 Use 2FA wherever possible.</li>
-        </ul>
-      </div>
     </div>
   </div>
 
-  <!-- JavaScript for Real-Time Gmail Data -->
+  <!-- JavaScript -->
   <script>
     async function loadEmailScanResults() {
       try {
@@ -98,62 +65,50 @@
         const lastScan = document.getElementById('last-scan-time');
 
         scanList.innerHTML = '';
-
         let phishing = 0;
 
         data.forEach(email => {
           const li = document.createElement('li');
-          li.innerHTML = `<strong>From:</strong> ${email.from} — ${email.status}<br><strong>Subject:</strong> ${email.subject}`;
+          li.className = `email-threat ${email.risk}`;
+          
+          li.innerHTML = `
+            <div class="email-header">
+              <span class="risk-badge ${email.risk}">${email.risk.toUpperCase()}</span>
+              <strong>From:</strong> ${email.from}
+            </div>
+            <div class="email-subject">${email.subject}</div>
+            <div class="threat-reason">🚨 ${getThreatReason(email)}</div>
+          `;
+          
           scanList.appendChild(li);
           if (email.status.includes("Phishing")) phishing++;
         });
 
+        // Update stats
         scanCount.textContent = data.length;
         phishingCount.textContent = phishing;
         riskLevel.textContent = phishing >= 3 ? 'High' : phishing === 0 ? 'Low' : 'Medium';
         riskLevel.style.color = phishing >= 3 ? 'red' : phishing === 0 ? 'green' : 'orange';
         lastScan.textContent = new Date().toLocaleString();
 
-        drawRiskChart(data.length, phishing);
-        drawThreatFrequencyChart(data);
       } catch (error) {
         console.error('Failed to fetch scan data:', error);
         document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
       }
     }
 
-    function drawRiskChart(total, phishing) {
-      const safe = total - phishing;
-      const ctx = document.getElementById('riskPieChart').getContext('2d');
-
-      if (window.riskChart) {
-        window.riskChart.destroy();
+    // Explain WHY something is dangerous
+    function getThreatReason(email) {
+      if (email.from.includes('amaz0n') || email.from.includes('paypa1')) {
+        return "Fake company domain (typosquatting)";
       }
-
-      window.riskChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Safe', 'Phishing'],
-          datasets: [{
-            data: [safe, phishing],
-            backgroundColor: ['#a855f7', '#ec4899'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          cutout: '65%',
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: {
-                color: '#eee',
-                padding: 15
-              }
-            }
-          }
-        }
-      });
+      if (email.subject.toLowerCase().includes('urgent') && email.subject.toLowerCase().includes('password')) {
+        return "Urgent password request - common phishing tactic";
+      }
+      if (email.from.includes('bit.ly') || email.from.includes('tinyurl')) {
+        return "URL shortener - hides real destination";
+      }
+      return "Suspicious patterns detected";
     }
 
     window.addEventListener('load', loadEmailScanResults);
