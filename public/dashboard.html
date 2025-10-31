@@ -3,20 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Neumorphic Dashboard</title>
+  <title>Threat Protector Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div id="app">
-    <!-- Sidebar -->
+    <!-- Sidebar - SIMPLIFIED -->
     <div class="sidebar">
       <h2>Threat Protector</h2>
       <div class="nav">
         <div class="nav-item active">Dashboard</div>
-        <div class="nav-item">Profile</div>
-        <div class="nav-item">Learn</div>
-        <div class="nav-item">Settings</div>
+        <!-- REMOVED: Profile, Learn, Settings -->
       </div>
     </div>
     
@@ -41,14 +39,14 @@
         <p>Last Scan: <strong id="last-scan-time">Just now</strong></p>
       </div>
 
-      <!-- Card 3: Threat Chart (Optional Placeholder) -->
+      <!-- Card 3: Threat Chart -->
       <div class="dashboard-card">
         <h2>Email Threat Chart</h2>
-         <canvas id="threatBarChart" width="300" height="150"></canvas>
-  <p style="margin-top: 1rem; font-size: 0.9rem;">Tracks how many phishing threats were detected daily.</p>
+        <canvas id="threatBarChart" width="300" height="150"></canvas>
+        <p style="margin-top: 1rem; font-size: 0.9rem;">Tracks how many phishing threats were detected daily.</p>
       </div>
 
-      <!-- Card 4: Static Threat Logs -->
+      <!-- Card 4: Threat Logs -->
       <div class="dashboard-card">
         <h2>Threat Log</h2>
         <ul>
@@ -74,14 +72,13 @@
         <button class="soft-btn">🚫 Block Sender</button>
       </div>
 
-      <!-- Card 7: Bonus Tips -->
+      <!-- Card 7: Security Tips -->
       <div class="dashboard-card">
-        <h2>Bonus Tips</h2>
+        <h2>Security Tips</h2>
         <ul>
           <li>✅ Hover to reveal full sender emails.</li>
-          <li>🚫 Don’t click unknown links.</li>
+          <li>🚫 Don't click unknown links.</li>
           <li>🔒 Use 2FA wherever possible.</li>
-          <li><a href="#" class="learn-link">Read More in Learn &rarr;</a></li>
         </ul>
       </div>
     </div>
@@ -118,57 +115,48 @@
         lastScan.textContent = new Date().toLocaleString();
 
         drawRiskChart(data.length, phishing);
+        drawThreatFrequencyChart(data);
       } catch (error) {
         console.error('Failed to fetch scan data:', error);
         document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
       }
     }
-    drawRiskChart(data.length, phishing);
-    drawThreatFrequencyChart(data); // ✅ Don't forget this!
-  } catch (error) {
-    console.error('Failed to fetch scan data:', error);
-    document.getElementById('scan-results').innerHTML = '<li>Error loading scan results.</li>';
-  }
-}
 
-function drawRiskChart(total, phishing) {
-  const safe = total - phishing;
-  const ctx = document.getElementById('riskPieChart').getContext('2d');
+    function drawRiskChart(total, phishing) {
+      const safe = total - phishing;
+      const ctx = document.getElementById('riskPieChart').getContext('2d');
 
-  if (window.riskChart) {
-    window.riskChart.destroy();
-  }
+      if (window.riskChart) {
+        window.riskChart.destroy();
+      }
 
-  window.riskChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Safe', 'Phishing'],
-      datasets: [{
-        data: [safe, phishing],
-        backgroundColor: ['#a855f7', '#ec4899'], // 💜💗 Purple-pink
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      cutout: '65%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            color: '#eee',
-            padding: 15
+      window.riskChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Safe', 'Phishing'],
+          datasets: [{
+            data: [safe, phishing],
+            backgroundColor: ['#a855f7', '#ec4899'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '65%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: '#eee',
+                padding: 15
+              }
+            }
           }
         }
-      }
+      });
     }
-  });
-}
 
-window.addEventListener('load', loadEmailScanResults);
+    window.addEventListener('load', loadEmailScanResults);
   </script>
-
-  <!-- External script file if needed -->
-  <script src="script.js"></script>
 </body>
 </html>
